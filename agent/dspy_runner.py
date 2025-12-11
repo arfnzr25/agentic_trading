@@ -32,7 +32,11 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
     # Extract Immutable Data needed for analysis
     market_data = state.get("market_data_snapshot", {}) 
     account_state = state.get("account_state", {})
-    account_equity = float(account_state.get("equity", 0))
+    real_exchange_equity = float(account_state.get("equity", 0))
+    
+    # Initialize or get shadow account (uses real equity on first run, then diverges)
+    shadow_account = DSPyRepository.get_or_create_account(real_exchange_equity)
+    shadow_equity = shadow_account.current_equity
     
     # --- EXECUTION ---
     try:
@@ -94,11 +98,12 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
         # Extract reasoning from DSPy output
         reasoning = getattr(signal, 'reasoning', None) or "No reasoning provided"
         
-        # Calculate position size based on equity (match legacy agent sizing)
+        # Calculate position size based on SHADOW equity (independent from exchange)
         leverage = 20
-        size_usd = min(account_equity * 0.9 * leverage, 1000.0) if account_equity > 0 else 1000.0
+        size_usd = min(shadow_equity * 0.9 * leverage, 1000.0) if shadow_equity > 0 else 1000.0
         
         print(f"[Shadow Mode] RESULT: {signal.signal} ({signal.confidence:.0%}) - {signal.coin}")
+        print(f"[Shadow Mode] Shadow Equity: ${shadow_equity:.2f} | Size: ${size_usd:.2f}")
         print(f"[Shadow Mode] Reasoning: {reasoning[:100]}...")
         
         trade_record = ShadowTrade(
@@ -109,7 +114,7 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
             entry_price=signal.entry_price if signal.entry_price else market_data.get("close", 0),
             size_usd=size_usd,
             leverage=leverage,
-            account_equity=account_equity,
+            account_equity=shadow_equity,  # Use shadow equity, not exchange
             stop_loss=signal.stop_loss,
             take_profit=signal.take_profit,
             market_context_hash=str(hash(str(inputs))),
