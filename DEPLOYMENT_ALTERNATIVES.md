@@ -26,21 +26,41 @@ This method runs the MCP Server, the Trading Agent, and the Dashboard as managed
    nano .env  # Enter your keys!
    ```
 
-2. **Start Everything**
+2. **Start the Agent (Headless)**
 
    ```bash
    docker compose up -d
    ```
 
-   _This builds the images and starts the server (port 8000), agent (background), and dashboard (port 8501)._
+   _This starts the MCP Server and Trading Agent in the background. The Dashboard is excluded by default for security._
 
-3. **Access**
-   - **Dashboard**: `http://your-vps-ip:8501`
-   - **Logs**: `docker compose logs -f`
+3. **Secure Dashboard Access (Manual Intervention)**
+
+   The dashboard is not exposed publicly by default. To access it securely:
+
+   **Step A: Start the Dashboard Container**
+
+   ```bash
+   docker compose --profile dashboard up -d
+   ```
+
+   **Step B: Create an SSH Tunnel**
+   On your **local machine** (not the VPS), run:
+
+   ```bash
+   # Syntax: ssh -L local_port:localhost:remote_port user@vps_ip
+   ssh -L 8501:localhost:8501 root@your-vps-ip
+   ```
+
+   **Step C: Access Locally**
+   Open your browser and visit: `http://localhost:8501`
+
+   _This method encrypts all traffic and requires no open ports on the VPS firewall._
 
 ### Stopping/Updating
 
-- Stop: `docker compose down`
+- Stop core services: `docker compose down`
+- Stop dashboard only: `docker compose --profile dashboard stop`
 - Update: `git pull && docker compose up -d --build`
 
 ---

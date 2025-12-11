@@ -43,6 +43,7 @@ services:
   # 3. Dashboard - UI for monitoring
   # ---------------------------------------------------------------------------
   dashboard:
+    profiles: ["dashboard"] # Require explicit start: docker compose --profile dashboard up
     build:
       context: .
       dockerfile: Dockerfile.agent
