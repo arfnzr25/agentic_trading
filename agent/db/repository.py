@@ -9,7 +9,7 @@ from typing import Optional
 from sqlmodel import Session, select, func
 from sqlalchemy import desc
 
-from .models import Trade, Signal, ExitPlan, Approval, AgentLog, MarketMemory
+from .models import Trade, Signal, ExitPlan, Approval, AgentLog, MarketMemory, InferenceLog
 from .engine import get_session
 
 
@@ -251,7 +251,6 @@ class InferenceLogRepository:
         trade_id: Optional[int] = None
     ) -> InferenceLog:
         """Create an inference log entry."""
-        from .models import InferenceLog
         
         log = InferenceLog(
             cycle_number=cycle_number,
@@ -278,7 +277,6 @@ class InferenceLogRepository:
     @staticmethod
     def get_recent(session: Session, limit: int = 50):
         """Get recent inference logs."""
-        from .models import InferenceLog
         statement = select(InferenceLog).order_by(desc(InferenceLog.timestamp)).limit(limit)
         return list(session.exec(statement).all())
 
