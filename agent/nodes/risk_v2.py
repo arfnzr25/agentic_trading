@@ -35,9 +35,9 @@ async def risk_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     
     print(f"\n[Risk v2] Evaluating signal: {signal_type} ({confidence:.0%})")
     
-    # Quick HOLD check - STRICT for small accounts
+    # Quick HOLD check - STRICT for ALL accounts
     # Require 60%+ confidence to trade (fees eat small wins)
-    min_confidence = 0.6 if float(account_state.get("equity", 0)) < 50 else 0.5
+    min_confidence = 0.6
     
     if signal_type == "HOLD" or confidence < min_confidence:
         print(f"[Risk v2] Decision: NO_TRADE (signal={signal_type}, conf={confidence:.0%}, min_required={min_confidence:.0%})")
@@ -46,7 +46,7 @@ async def risk_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
             "risk_decision": {
                 "approved": False,
                 "action": "NO_TRADE",
-                "reason": f"Signal is {signal_type} with {confidence:.0%} confidence (need {min_confidence:.0%}+ for small account)"
+                "reason": f"Signal is {signal_type} with {confidence:.0%} confidence (need {min_confidence:.0%}+)"
             }
         }
     

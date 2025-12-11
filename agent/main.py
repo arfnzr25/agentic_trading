@@ -88,13 +88,14 @@ async def get_account_state(tools: list) -> dict:
         return {"error": str(e)}
 
 
-async def run_inference_cycle(mcp_client: MultiServerMCPClient, tools: list) -> dict:
+async def run_inference_cycle(mcp_client: MultiServerMCPClient, tools: list, cycle_count: int) -> dict:
     """Run a single inference cycle."""
     
     print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Starting inference cycle...")
     
     # Build initial state
     state = get_initial_state()
+    state["cycle_number"] = cycle_count  # Inject into state
     
     # Get current account state
     account_state = await get_account_state(tools)
@@ -201,7 +202,7 @@ async def main_loop():
             cycle_count += 1
             print(f"\n--- Cycle #{cycle_count} ---")
             
-            await run_inference_cycle(mcp_client, tools)
+            await run_inference_cycle(mcp_client, tools, cycle_count)
             
             # Wait for next cycle
             print(f"\n[WAIT] Sleeping {cfg.inference_interval_seconds}s until next cycle...")

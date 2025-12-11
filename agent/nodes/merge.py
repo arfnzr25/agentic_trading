@@ -288,33 +288,7 @@ Take Profit: +{tp_str}
 Reply [YES] to APPROVE or [NO] to REJECT"""
 
 
-def _persist_trade(trade_params: dict, result: Any, state: dict):
-    """Save executed trade to database."""
-    try:
-        # Parse result for entry price
-        avg_px = 0.0
-        if isinstance(result, dict):
-            avg_px = float(result.get("avgPx", result.get("entryPx", 0)))
-        
-        with get_session() as session:
-            new_trade = Trade(
-                coin=trade_params["coin"],
-                direction="LONG" if trade_params["is_buy"] else "SHORT",
-                entry_price=avg_px,
-                size=trade_params["size"],
-                leverage=trade_params["leverage"],
-                reasoning=state.get("analyst_signal", {}).get("reasoning", "Autonomous Entry"),
-                stop_loss_pct=trade_params.get("sl_pct"),
-                take_profit_pct=trade_params.get("tp_pct"),
-                opened_at=datetime.utcnow()
-            )
-            TradeRepository.create(session, new_trade)
-            print(f"[Merge] Trade persisted to DB: {new_trade.coin} {new_trade.direction} @ {avg_px}")
-            
-    except Exception as db_e:
-        print(f"[Merge] Failed to persist trade to DB: {db_e}")
-        import traceback
-        traceback.print_exc()
+
 
 
 async def _execute_trade(trade_params: dict, tools: list, state: dict) -> dict:
@@ -365,7 +339,8 @@ async def _execute_trade(trade_params: dict, tools: list, state: dict) -> dict:
         
         
         # --- PERSIST TRADE TO DATABASE ---
-        _persist_trade(trade_params, result, state)
+        # Use the robust saver (handles both new trades and updates)
+        _save_trade_to_db(trade_params, state.get("analyst_signal", {}), state.get("risk_decision", {}), result)
             
         return {"success": True, "result": result}
         
@@ -418,7 +393,7 @@ async def _execute_scale_out(coin: str, tools: list, pct: float = 0.5) -> dict:
         return {"success": False, "error": str(e)}
 
 
-def _save_trade_to_db(trade_params: dict, analyst_signal: dict, risk_decision: dict) -> None:
+def _save_trade_to_db(trade_params: dict, analyst_signal: dict, risk_decision: dict, result: Any = None) -> None:
     """Save executed trade and exit plan to database (Create or Update)."""
     
     try:
@@ -466,14 +441,20 @@ def _save_trade_to_db(trade_params: dict, analyst_signal: dict, risk_decision: d
                 
             else:
                 # CREATE new trade
+                
+                # Get actual entry price from result if available
+                entry_px = analyst_signal.get("entry_price", 0)
+                if result and isinstance(result, dict):
+                    entry_px = float(result.get("avgPx", result.get("entryPx", entry_px)))
+                
                 trade = Trade(
                     coin=trade_params["coin"],
                     direction="LONG" if trade_params["is_buy"] else "SHORT",
-                    entry_price=analyst_signal.get("entry_price", 0),
+                    entry_price=entry_px,
                     size_usd=trade_params["size"],
                     size_tokens=0, 
                     leverage=trade_params["leverage"],
-                    reasoning=analyst_signal.get("reasoning", "")
+                    reasoning=analyst_signal.get("reasoning", "Autonomous Entry (No reasoning provided)")
                 )
                 session.add(trade)
                 session.commit()
