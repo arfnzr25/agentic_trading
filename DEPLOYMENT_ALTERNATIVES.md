@@ -13,7 +13,7 @@ This method runs the MCP Server, the Trading Agent, and the Dashboard as managed
 
 ### Prerequisites
 
-- Docker & Docker Compose installed on your VPS.
+- Docker & Docker Compose installed on your VPS. (See [Appendix](#appendix-installing-docker-on-ubuntu-linux-vps))
 
 ### Steps
 
@@ -102,3 +102,50 @@ This script automates the "Detailed Setup" from the main guide. It installs Pyth
 | **Updates**    | `docker compose up --build` | `git pull && restart services` | Manual       |
 | **Isolation**  | High (Containers)           | Low (System Python)            | Low          |
 | **Complexity** | Low                         | Low                            | High         |
+
+---
+
+## Appendix: Installing Docker on Ubuntu (Linux VPS)
+
+If your VPS does not have Docker installed, follow these commands:
+
+1.  **Set up the repository**
+
+    ```bash
+    # Update package index and install prerequisite packages
+    sudo apt-get update
+    sudo apt-get install -y ca-certificates curl gnupg
+
+    # Create keyrings directory
+    sudo install -m 0755 -d /etc/apt/keyrings
+
+    # Download Docker's official GPG key
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+    # Set up the repository
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    ```
+
+2.  **Install Docker Engine**
+
+    ```bash
+    sudo apt-get update
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    ```
+
+3.  **Verify Installation**
+
+    ```bash
+    sudo docker run hello-world
+    ```
+
+4.  **(Optional) Run Docker without sudo**
+    ```bash
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
