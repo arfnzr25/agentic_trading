@@ -20,6 +20,7 @@ from .graph import run_sequential_cycle, get_initial_state
 from .db import create_tables, get_session, AgentLogRepository
 from .db.async_logger import async_logger
 from .learning import init_learning
+from .dspy_runner import run_shadow_cycle
 from . import telegram
 
 
@@ -140,6 +141,10 @@ async def run_inference_cycle(mcp_client: MultiServerMCPClient, tools: list, cyc
         )
     except Exception as tg_err:
         print(f"[Telegram] Notification error: {tg_err}")
+    
+    # --- SHADOW MODE INJECTION ---
+    # Run DSPy Shadow Agent in background using the *exact same* data from this cycle
+    asyncio.create_task(run_shadow_cycle(result, tools))
     
     return result
 

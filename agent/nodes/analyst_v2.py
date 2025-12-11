@@ -24,6 +24,7 @@ from ..data_fetcher import fetch_analyst_data, calculate_timestamps, summarize_c
 from ..learning import get_learning_context
 from datetime import datetime
 from sqlmodel import select
+from ..models.schemas import TradeSignal
 
 
 async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
@@ -254,6 +255,7 @@ OUTPUT JSON:
             "analyst_reasoning": signal.get("reasoning", response.content),
             "tools_called": ["get_market_context", "get_candles", "get_account_health"],
             "memory_context": memory,  # Pass to Risk node
+            "market_data_snapshot": data, # EXPOSE TO SHADOW RUNNER
         }
         
     except Exception as e:
@@ -274,7 +276,7 @@ OUTPUT JSON:
 
 
 def _parse_signal(content: str, coin: str) -> dict:
-    """Extract JSON signal from LLM response."""
+    """Extract and VALIDATE JSON signal using Pydantic shared model."""
     try:
         # Try to find JSON block
         if "```json" in content:
@@ -286,11 +288,27 @@ def _parse_signal(content: str, coin: str) -> dict:
             end = content.rfind("}") + 1
             json_str = content[start:end]
         else:
-            return {"signal": "HOLD", "coin": coin, "reasoning": "Could not parse response"}
+            print("[Analyst v2] PARSE ERROR: No JSON found in response")
+            return {"signal": "HOLD", "coin": coin, "reasoning": "Could not parse response: No JSON found", "confidence": 0.0}
         
-        signal = json.loads(json_str)
-        signal["coin"] = signal.get("coin", coin)
-        return signal
+        # 1. Basic Parse
+        raw_data = json.loads(json_str)
+        raw_data["coin"] = raw_data.get("coin", coin)
+        
+        # 2. Pydantic Validation (Strict Type Checking)
+        try:
+            validated_signal = TradeSignal(**raw_data)
+            return validated_signal.model_dump()
+        except Exception as validation_err:
+            print(f"[Analyst v2] VALIDATION FAILED: {validation_err}")
+            # Fallback to safe HOLD if schema is violated
+            return {
+                "signal": "HOLD", 
+                "coin": coin, 
+                "confidence": 0.0,
+                "reasoning": f"Schema validation failed: {str(validation_err)[:100]}..."
+            }
         
     except Exception as e:
-        return {"signal": "HOLD", "coin": coin, "reasoning": f"Parse error: {e}"}
+        print(f"[Analyst v2] JSON PARSE ERROR: {e}")
+        return {"signal": "HOLD", "coin": coin, "reasoning": f"Parse error: {e}", "confidence": 0.0}

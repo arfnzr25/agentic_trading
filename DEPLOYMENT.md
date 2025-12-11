@@ -78,6 +78,7 @@ HL_WL=your_wallet_address_here
 
 # ===== LLM API KEYS =====
 OPENROUTER_API_KEY=your_openrouter_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 # OR
 OPENAI_API_KEY=your_openai_key
 
@@ -188,6 +189,7 @@ streamlit run ui/dashboard.py --server.port 8501 --server.address 0.0.0.0
 Access via: `http://your-vps-ip:8501`
 
 > ⚠️ **Security**: Use SSH tunnel for dashboard access instead of exposing port:
+>
 > ```bash
 > ssh -L 8501:localhost:8501 root@your-vps-ip
 > # Then access: http://localhost:8501
@@ -228,12 +230,12 @@ sudo ufw enable
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
+| Issue                       | Solution                                                         |
+| --------------------------- | ---------------------------------------------------------------- |
 | Agent not connecting to MCP | Check if MCP server is running: `curl http://localhost:8000/sse` |
-| LLM errors | Verify API keys in `.env`, check rate limits |
-| Trade not executing | Check MCP server logs for API errors |
-| High memory usage | Reduce `INFERENCE_INTERVAL` or restart agent |
+| LLM errors                  | Verify API keys in `.env`, check rate limits                     |
+| Trade not executing         | Check MCP server logs for API errors                             |
+| High memory usage           | Reduce `INFERENCE_INTERVAL` or restart agent                     |
 
 ---
 

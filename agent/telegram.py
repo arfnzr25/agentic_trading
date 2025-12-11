@@ -306,3 +306,59 @@ async def notify_error(error: str):
 ```"""
     
     await send_message(message)
+
+
+# --- SHADOW MODE NOTIFICATIONS ---
+
+async def notify_shadow_trade_opened(
+    coin: str,
+    signal: str,
+    confidence: float,
+    entry_price: float,
+    stop_loss: Optional[float] = None,
+    take_profit: Optional[float] = None
+):
+    """Send Shadow Mode trade open notification."""
+    if not is_enabled():
+        return
+
+    emoji = "👻" # Ghost for Shadow Mode
+    action_emoji = "🟢" if signal == "LONG" else "🔴"
+    
+    start_msg = f"""{emoji} *SHADOW TRADE OPENED*
+    
+{action_emoji} *{coin} {signal}* ({confidence*100:.0f}%)
+Entry: `${entry_price:,.2f}`"""
+
+    if stop_loss:
+        start_msg += f"\nSL: `${stop_loss:,.2f}`"
+    if take_profit:
+        start_msg += f"\nTP: `${take_profit:,.2f}`"
+        
+    await send_message(start_msg)
+
+
+async def notify_shadow_trade_closed(
+    coin: str,
+    signal: str,
+    entry_price: float,
+    exit_price: float,
+    pnl_usd: float,
+    pnl_pct: float,
+    reason: str
+):
+    """Send Shadow Mode trade close notification."""
+    if not is_enabled():
+        return
+
+    emoji = "👻"
+    profit_emoji = "✅" if pnl_usd >= 0 else "❌"
+    
+    msg = f"""{emoji} *SHADOW TRADE CLOSED*
+    
+{profit_emoji} *{coin} {signal}*
+Entry: `${entry_price:,.2f}` → Exit: `${exit_price:,.2f}`
+PnL: `${pnl_usd:+.2f}` ({pnl_pct:+.1f}%)
+Outcome: *{reason}*"""
+
+    await send_message(msg)

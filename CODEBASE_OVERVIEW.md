@@ -1,209 +1,119 @@
-# Hyperliquid MCP Agent - Codebase Overview
+# Hyperliquid Agentic Trading System - Codebase Overview
 
 ## Project Summary
 
-This project is a **Model Context Protocol (MCP) Server** that enables AI agents (like Claude) to interact with the **Hyperliquid** decentralized perpetual futures exchange. It acts as a bridge between AI assistants and the Hyperliquid trading platform, providing comprehensive trading, analytics, and risk management capabilities.
+This project is an advanced **Agentic Trading System** built on top of the Model Context Protocol (MCP). It features a **Dual-AI Architecture** where a legacy LangGraph agent manages live capital while a "Shadow Mode" DSPy agent mimics the process to learn and optimize strategies without risk.
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ```mermaid
-graph LR
-    A[AI Agent<br/>Claude/Other] <--> B[MCP Server<br/>server.py]
-    B <--> C[Hyperliquid SDK]
-    C <--> D[Hyperliquid Exchange<br/>Mainnet API]
-    B --> E[Logs]
-```
+graph TD
+    subgraph "External"
+        HL[Hyperliquid Exchange]
+        LLM[OpenRouter / OpenAI]
+        MCP[Hyperliquid MCP Server]
+    end
 
-The server uses the **FastMCP** framework to expose trading tools via the MCP protocol, communicating either through:
-- **Stdio** (Standard I/O) - for local use
-- **SSE** (Server-Sent Events) - for remote/VPS deployment
+    subgraph "Agent Core (LangGraph)"
+        Data[Analyst Node v2] --> Risk[Risk Node v2]
+        Risk --> Merge[Merge Node]
+        Merge --> Exec[Execution Tool]
+    end
+
+    subgraph "Shadow Mode (DSPy)"
+        Data -.->|Async| Runner[Shadow Runner]
+        Runner --> Module[DSPy Module]
+        Module --> DB_S[dspy_memory.db]
+        Sim[Simulator] -->|P&L Check| DB_S
+    end
+
+    Exec -->|Order| MCP
+    MCP -->|API| HL
+    Module -->|Inference| LLM
+```
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 hyperliquid-mcp-agent/
-├── .env                        # API credentials (private - not in git)
-└── deployment-test/
-    ├── server.py               # Main MCP server (~1000 lines)
-    ├── requirements.txt        # Python dependencies
-    ├── pyproject.toml          # Project metadata for uv/pip
-    ├── Dockerfile              # Docker container configuration
-    ├── verify_tools.py         # Test script for tools
-    ├── .env.example            # Template for environment variables
-    ├── README.md               # Quick start guide
-    ├── walkthrough.md          # Feature documentation
-    └── persistent_deployment.md # VPS deployment guide
+├── .env                        # Credentials (Private)
+├── agent/                      # PRINCIPAL AGENT CODE
+│   ├── nodes/                  # LangGraph Nodes
+│   │   ├── analyst_v2.py       # Market Analysis (3-Phase)
+│   │   ├── risk_v2.py          # Risk Management
+│   │   └── merge.py            # Signal Synthesis & Execution
+│   ├── dspy/                   # SHADOW MODE CODE
+│   │   ├── modules.py          # DSPy Modules (ShadowTrader)
+│   │   ├── signatures.py       # Typed Signatures
+│   │   └── simulator.py        # P&L Simulation Layer
+│   ├── models/                 # Shared Pydantic Schemas
+│   │   └── schemas.py          # TradeSignal, RiskDecision
+│   ├── db/                     # Persistence
+│   │   ├── dspy_memory.py      # Shadow DB Models
+│   │   └── repository.py       # Live DB Access
+│   ├── dspy_runner.py          # Async Shadow Orchestrator
+│   ├── main.py                 # Application Entry Point
+│   └── telegram.py             # Notification System
+├── deployment-test/            # MCP SERVER CODE
+│   └── server.py               # Core MCP Tools
+└── README.md                   # Setup Guide
 ```
 
 ---
 
-## Core Components
+## 🧩 Core Components
 
-### 1. MCP Server (`server.py`)
+### 1. Principal Agent (Live Trading)
 
-The main application file containing:
+- **Analyst (`analyst_v2.py`)**: Fetches 5m/1h/4h/1d candles and performs a 3-phase analysis (Memory -> Fetch -> LLM).
+- **Risk Manager (`risk_v2.py`)**: Validates signals against account equity, leverage limits, and "Bear Trend" safety rules.
+- **Merge Node (`merge.py`)**: Synthesizes the decision. Converts absolute risk prices (SL/TP) into execution percentages.
 
-| Component | Description |
-|-----------|-------------|
-| **AgentLogger** | Logs all tool calls to daily log files (`agent_actions.log`, `trades.log`) |
-| **PrecisionManager** | Handles price/size rounding based on exchange metadata |
-| **FastMCP Instance** | Core MCP server exposing tools to AI agents |
-| **Exchange/Info Clients** | Hyperliquid SDK clients for trading and data retrieval |
+### 2. Shadow Mode (Optimization)
 
-### 2. Decorators
+- **Goal**: Create a labeled dataset (Signal + Outcome) to train a better prompt (MIPROv2).
+- **Runner (`dspy_runner.py`)**: Runs asynchronously after the main cycle.
+- **Module (`modules.py`)**: Uses `dspy.Predict` with Assertions (`dspy.Suggest`) to explore self-correction.
+- **Simulator (`simulator.py`)**: Tracks "Paper Trades" and calculates P&L based on real market moves.
 
-- `@log_action` - Automatically logs every tool call
-- `@handle_errors` - Catches exceptions and returns user-friendly error messages
-- `@ttl_cache(seconds)` - Time-based caching for frequently-called tools
+### 3. MCP Server (`deployment-test/server.py`)
 
-### 3. Configuration
-
-Environment variables (from `.env`):
-
-| Variable | Purpose |
-|----------|---------|
-| `HL_WL` | Public wallet address (Master Wallet) |
-| `HL_PK` | Private key for signing transactions |
-| `AG_WL` | Optional Agent Wallet address for verification |
-| `ENABLE_MASTER_INTERACTION` | Safety flag to allow direct master wallet usage |
+- Acts as the **Device Layer**.
+- Exposes secure tools (`place_smart_order`, `get_candles`) to the agent.
+- Handles signing and API connectivity.
 
 ---
 
-## Available Tools
+## 💾 Data Persistence
 
-### Market Data
+The system uses **SQLite** for robust local storage:
 
-| Tool | Description |
-|------|-------------|
-| `get_all_mids()` | Current mid prices for all assets |
-| `get_l2_snapshot(coin)` | L2 order book snapshot |
-| `get_candles(coin, interval, start, end)` | Historical OHLCV data |
-| `get_funding_history(coin, start, end)` | Funding rate history |
-
-### Account Information
-
-| Tool | Description |
-|------|-------------|
-| `get_account_info(type)` | Balances, margin, positions (perp/spot) |
-| `get_account_health()` | Equity, margin usage, risk level |
-| `get_user_fills()` | Trade history |
-| `get_open_orders()` | Current open orders |
-| `get_historical_orders()` | Order history |
-| `get_user_funding_history(start, end)` | Personal funding payments |
-
-### Trading
-
-| Tool | Description |
-|------|-------------|
-| `place_order(coin, is_buy, sz, limit_px, ...)` | Basic limit order |
-| `place_smart_order(coin, is_buy, size, size_type, ...)` | Smart order with USD/% sizing, TP/SL |
-| `cancel_order(coin, oid)` | Cancel single order |
-| `close_position(coin, percentage)` | Close position (partial or full) |
-| `transfer(amount, destination, token)` | Transfer funds |
-| `update_isolated_margin(coin, amount)` | Adjust isolated margin |
-
-### Analytics
-
-| Tool | Description |
-|------|-------------|
-| `get_token_analytics(coin, interval)` | Technical analysis (RSI, EMA, ADX, etc.) |
-| `get_order_book_analytics(coin)` | Order book imbalance, sentiment |
-| `get_volume_profile_24h(coin)` | Volume profile (POC, VAH, VAL) |
-| `get_correlation_matrix(coins)` | Price correlation between assets |
-| `get_market_leaders(limit)` | Top gainers/volume leaders |
-| `get_open_interest_delta(coin)` | Open interest analysis |
-
-### Risk Management
-
-| Tool | Description |
-|------|-------------|
-| `get_position_risk(coin)` | Liquidation price, distance, PnL |
-| `get_max_trade_size(coin, leverage)` | Calculate max position size |
-
-### Safety (PANIC Buttons)
-
-| Tool | Description |
-|------|-------------|
-| `cancel_all_orders()` | Cancel ALL open orders |
-| `close_all_positions()` | Market close ALL positions |
-| `schedule_cancel(time_ms)` | Dead man's switch |
+| Database      | File             | Purpose                                                     |
+| ------------- | ---------------- | ----------------------------------------------------------- |
+| **Live DB**   | `agent.db`       | Real trade history, User actions, Logs.                     |
+| **Shadow DB** | `dspy_memory.db` | Shadow trades, P&L simulation results, Optimization traces. |
 
 ---
 
-## Dependencies
+## 🔔 Notifications
 
-| Package | Purpose |
-|---------|---------|
-| `hyperliquid-python-sdk` | Official Hyperliquid API client |
-| `mcp` | Model Context Protocol framework |
-| `python-dotenv` | Environment variable management |
-| `eth-account` | Ethereum wallet/signing operations |
+Integrated **Telegram** alerts (`telegram.py`) for:
 
----
-
-## Deployment Options
-
-### Local (Stdio)
-```bash
-python server.py
-```
-
-### Remote VPS (SSE via Docker)
-```bash
-docker build -t hl-mcp .
-docker run -d --restart always --env-file .env -p 127.0.0.1:8000:8000 hl-mcp python server.py --transport sse
-```
-
-Connection is secured via SSH tunnel (see `persistent_deployment.md`).
+- **Live Trades**: Execution confirmations.
+- **Shadow Trades**: Ghost-themed alerts (`👻 SHADOW TRADE OPENED`) to visualize what the optimizee is thinking.
+- **Errors**: Critical failure alerts.
 
 ---
 
-## Security Considerations
+## 🛠️ Configuration (`agent/config.py`)
 
-> [!CAUTION]
-> This server has direct access to your trading account via the private key.
+Key settings managed via `.env`:
 
-1. **Agent Wallet Recommended**: Use an Agent Wallet with limited permissions instead of your Master Wallet
-2. **Master Wallet Protection**: `ENABLE_MASTER_INTERACTION=false` by default prevents accidental master wallet usage
-3. **SSH Tunnel**: Remote deployments should NEVER expose port 8000 publicly - always use SSH tunneling
-4. **Logging**: All actions are logged for audit purposes
-
----
-
-## Testing
-
-Run the verification script to test read-only tools:
-```bash
-python verify_tools.py
-```
-
-This tests:
-- Analytics tools (token analysis, order book, volume profile)
-- Account tools (info, health, market leaders)
-- Risk tools (position risk, max trade size)
-
----
-
-## Key Design Decisions
-
-1. **Consolidated Tools**: Multiple related functions merged into single smart tools (e.g., `place_smart_order` handles USD/% sizing)
-2. **Precision Handling**: `PrecisionManager` automatically applies correct decimals for each asset
-3. **TTL Caching**: Frequently-called tools cache results to reduce API load
-4. **Dual Transport**: Supports both Stdio (local) and SSE (remote) transports
-5. **Comprehensive Logging**: Every tool call logged with timestamps for debugging and audit
-
----
-
-## Summary
-
-This MCP server transforms Hyperliquid into a "Trading OS" for AI agents, providing:
-- ✅ Real-time market data access
-- ✅ Smart order placement with flexible sizing
-- ✅ Risk monitoring and management
-- ✅ Panic buttons for emergency exits
-- ✅ Secure remote deployment options
-- ✅ Comprehensive action logging
+- `OPENROUTER_API_KEY`: For flexible model selection (e.g., DeepSeek, Claude 3.5).
+- `OPENROUTER_BASE_URL`: API Endpoint.
+- `ANALYST_MODEL`: Model ID for market analysis.
+- `FOCUS_COINS`: List of assets to trade (e.g., `["BTC"]`).

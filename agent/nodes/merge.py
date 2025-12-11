@@ -219,9 +219,38 @@ def _build_trade_params(analyst_signal: dict, risk_decision: dict, cfg, state: d
         if state:
             pos_details = state.get("account_state", {}).get("open_position_details", {})
             current_side = pos_details.get(coin, "LONG") # Default to LONG if unknown (risky but fallback)
-            is_buy = (current_side == "LONG")
             
+    # --- EXIT PLAN handling (Schema Compatibility) ---
+    # RiskDecision schema provides 'stop_loss' and 'take_profit' as PRICES (top level)
+    # Legacy logic expected 'exit_plan' dict with 'stop_loss_pct'
     
+    entry_price = analyst_signal.get("entry_price") or state.get("account_state", {}).get("market_price") 
+    # Fallback to current price if not provided (need price to calc pct)
+    # NOTE: In real-exec, 'place_smart_order' fetches current price if entry is Market.
+    # But for SL% calculation, we need a reference.
+    if not entry_price and analyst_signal.get("close"):
+         entry_price = analyst_signal.get("close")
+         
+    sl_price = risk_decision.get("stop_loss")
+    tp_price = risk_decision.get("take_profit")
+    
+    sl_pct = exit_plan.get("stop_loss_pct")
+    tp_pct = exit_plan.get("take_profit_pct")
+    
+    # Calculate PCT from PRICE if PCT is missing
+    if entry_price and entry_price > 0:
+        if sl_price and not sl_pct:
+            # Long: (Entry - SL) / Entry | Short: (SL - Entry) / Entry
+            # Absolute difference / Entry is safer
+            sl_pct = abs(entry_price - sl_price) / entry_price
+            
+        if tp_price and not tp_pct:
+            tp_pct = abs(entry_price - tp_price) / entry_price
+            
+    # Defaults
+    if not sl_pct: sl_pct = cfg.risk.default_sl_btc_pct
+    if not tp_pct: tp_pct = 0.05
+
     # --- SIZE BUMPING LOGIC (Ladder Mode Override) ---
     # In standard mode: bump to $12 minimum if too small.
     # In LADDER MODE (Equity < $50): Force MAX MARGIN position for aggressive growth.
@@ -249,8 +278,8 @@ def _build_trade_params(analyst_signal: dict, risk_decision: dict, cfg, state: d
         "is_buy": is_buy,
         "size": size_usd,
         "size_type": "usd",
-        "sl_pct": exit_plan.get("stop_loss_pct", cfg.risk.default_sl_btc_pct),
-        "tp_pct": exit_plan.get("take_profit_pct", 0.05),
+        "sl_pct": round(sl_pct, 4),
+        "tp_pct": round(tp_pct, 4),
         "leverage": leverage
     }
 

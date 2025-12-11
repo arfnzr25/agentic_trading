@@ -13,6 +13,7 @@ from ..llm_factory import get_risk_llm
 from ..prompts import get_risk_prompt
 from ..db.async_logger import async_logger
 from ..config import get_config
+from ..models.schemas import RiskDecision
 
 
 async def risk_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
@@ -186,8 +187,9 @@ Recommendation: {learning.get('recommendation', 'N/A')}"""
 
 
 def _parse_decision(content: str) -> dict:
-    """Extract JSON decision from LLM response."""
+    """Extract and VALIDATE JSON decision using Pydantic model."""
     try:
+        # Extract JSON
         if "```json" in content:
             json_str = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
@@ -197,29 +199,36 @@ def _parse_decision(content: str) -> dict:
             end = content.rfind("}") + 1
             json_str = content[start:end]
         else:
-            return {"approved": False, "action": "NO_TRADE", "reason": "Parse failed"}
+            print("[Risk v2] PARSE ERROR: No JSON found")
+            return {"approved": False, "action": "NO_TRADE", "reason": "No JSON found in response", "size_usd": 0.0, "leverage": 1}
         
-        parsed = json.loads(json_str)
+        raw_data = json.loads(json_str)
         
-        # Normalize different LLM response formats
-        # Map "decision" -> "action", "reasoning" -> "reason"
-        action = parsed.get("action") or parsed.get("decision", "NO_TRADE")
-        reason = parsed.get("reason") or parsed.get("reasoning", "")
-        
-        # Determine if approved based on action
-        is_approved = action in ["APPROVE", "OPEN_LONG", "OPEN_SHORT"]
-        
-        return {
-            "approved": parsed.get("approved", is_approved),
-            "action": action,
-            "size_usd": parsed.get("size_usd", 0),
-            "leverage": parsed.get("leverage", 1),
-            "stop_loss": parsed.get("stop_loss"),
-            "take_profit": parsed.get("take_profit"),
-            "invalidation_conditions": parsed.get("invalidation_conditions", []),
-            "reason": reason
-        }
-        
+        # Normalize fields for Pydantic
+        # Map "decision" -> "action" (common LLM alias)
+        if "decision" in raw_data and "action" not in raw_data:
+            raw_data["action"] = raw_data["decision"]
+            
+        # Map "reasoning" -> "reason"
+        if "reasoning" in raw_data and "reason" not in raw_data:
+            raw_data["reason"] = raw_data["reasoning"]
+            
+        # 1. Pydantic Validation
+        try:
+            validated_decision = RiskDecision(**raw_data)
+            return validated_decision.model_dump()
+        except Exception as validation_err:
+            print(f"[Risk v2] VALIDATION FAILED: {validation_err}")
+            # Fail safe
+            return {
+                "approved": False, 
+                "action": "NO_TRADE", 
+                "reason": f"Schema validation failed: {str(validation_err)[:100]}",
+                "size_usd": 0.0,
+                "leverage": 1
+            }
+            
     except Exception as e:
-        return {"approved": False, "action": "NO_TRADE", "reason": f"Parse error: {e}"}
+        print(f"[Risk v2] ERROR: {e}")
+        return {"approved": False, "action": "NO_TRADE", "reason": f"Parse error: {e}", "size_usd": 0.0, "leverage": 1}
 
