@@ -18,14 +18,17 @@ class ShadowTrader(dspy.Module):
         # Use Predict since TradeSignal already includes a 'reasoning' field
         self.analyze = dspy.Predict(StrategicAnalysis)
         
-    def forward(self, market_structure: str, risk_environment: str, social_sentiment: float, whale_activity: str, macro_context: str):
+    def forward(self, market_structure: str, risk_environment: str, social_sentiment: float, 
+                whale_activity: str, macro_context: str, account_context: str, last_trade_outcome: str):
         # 1. Generate Prediction
         pred = self.analyze(
             market_structure=market_structure,
             risk_environment=risk_environment,
             social_sentiment=social_sentiment,
             whale_activity=whale_activity,
-            macro_context=macro_context
+            macro_context=macro_context,
+            account_context=account_context,
+            last_trade_outcome=last_trade_outcome
         )
         
         # Ensure strict Pydantic type (Defensive coding for LLM variance)
