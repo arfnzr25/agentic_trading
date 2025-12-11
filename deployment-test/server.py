@@ -273,7 +273,9 @@ def get_candles(coin: str, interval: str, start_time: int, end_time: int) -> lis
     """
 
     log(f"Fetching candles for {coin} ({interval}) from {start_time} to {end_time}")
-    return info.candles_snapshot(coin, interval, start_time, end_time)
+    result = info.candles_snapshot(coin, interval, start_time, end_time)
+    log(f"Fetched {len(result)} candles for {coin}")
+    return result
 
 
 

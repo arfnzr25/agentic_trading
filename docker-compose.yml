@@ -13,6 +13,8 @@ services:
       - "127.0.0.1:8000:8000" # Localhost only for security
     env_file:
       - .env
+    volumes:
+      - .env:/app/.env
     restart: always
     networks:
       - agent-network
