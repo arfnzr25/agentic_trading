@@ -21,7 +21,6 @@ class ShadowTrade(SQLModel, table=True):
     # Execution
     entry_price: float
     size_usd: float
-    size_usd: float
     leverage: int
     
     # Target (For Simulation)
@@ -57,11 +56,11 @@ class OptimizationExample(SQLModel, table=True):
 
 # --- DATABASE ENGINE ---
 
-# Distinct database file for Shadow Mode to ensure isolation
-DB_FILE = "dspy_memory.db"
-DATABASE_URL = f"sqlite:///{DB_FILE}"
+# Distinct database file using env var for Docker persistence
+default_db_file = "dspy_memory.db"
+unique_db_url = os.getenv("DSPY_DATABASE_URL", f"sqlite:///{default_db_file}")
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(unique_db_url)
 
 def init_dspy_db():
     SQLModel.metadata.create_all(engine)

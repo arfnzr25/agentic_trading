@@ -5,11 +5,14 @@ In addition to the manual setup described in `DEPLOYMENT.md`, we provide two "Qu
 1. **Docker Compose (Recommended)**: Best for reliability, isolation, and quick updates.
 2. **One-Click Script**: Best for bare-metal VPS if you prefer not to use Docker.
 
+> [!IMPORTANT] > **New Requirement**: The agent now features a DSPy Shadow Mode.
+> Ensure your `.env` file includes `OPENROUTER_BASE_URL` and `OPENROUTER_API_KEY` for it to function.
+
 ---
 
 ## Option 1: Docker Compose (Speed & Isolation)
 
-This method runs the MCP Server, the Trading Agent, and the Dashboard as managed containers.
+This method runs the MCP Server, the Trading Agent (including Shadow Simulator), and the Dashboard as managed containers.
 
 ### Prerequisites
 
@@ -23,7 +26,7 @@ This method runs the MCP Server, the Trading Agent, and the Dashboard as managed
    git clone https://github.com/your-repo/hyperliquid-mcp-agent.git
    cd hyperliquid-mcp-agent
    cp .env.example .env
-   nano .env  # Enter your keys!
+   nano .env  # Update keys (Hyperliquid, OpenRouter, Telegram)
    ```
 
 2. **Start the Agent (Headless)**
@@ -32,7 +35,7 @@ This method runs the MCP Server, the Trading Agent, and the Dashboard as managed
    docker compose up -d
    ```
 
-   _This starts the MCP Server and Trading Agent in the background. The Dashboard is excluded by default for security._
+   _This starts the MCP Server and Trading Agent in the background. The Shadow Database (`dspy_memory.db`) is automatically persisted in the `agent_data` volume._
 
 3. **Secure Dashboard Access (Manual Intervention)**
 
@@ -73,20 +76,15 @@ To see verbose information about the state of your containers live on the VPS:
     docker compose logs -f
     ```
 
-    - To view a specific service (e.g., just the agent):
+    - To view shadow mode logs specifically:
       ```bash
-      docker compose logs -f agent
+      docker compose logs -f agent | grep "Shadow Mode"
       ```
 
 2.  **Check Process Status**:
 
     ```bash
     docker compose ps
-    ```
-
-3.  **View Resource Usage** (CPU/Memory):
-    ```bash
-    docker stats
     ```
 
 ---
@@ -111,7 +109,7 @@ This script automates the "Detailed Setup" from the main guide. It installs Pyth
    ```
 
 2. **Configure**
-   The script will pause to let you edit `.env`.
+   The script will pause to let you edit `.env`. **Make sure to fill in the Notification sections if you want Telegram alerts.**
 
 3. **Verify**
    ```bash
