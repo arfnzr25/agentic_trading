@@ -96,12 +96,6 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     
     # Debug: check what we got
     candles_5m_raw = data.get("candles_5m", "")
-    print(f"[Analyst v2] DEBUG: candles_5m_raw type: {type(candles_5m_raw)}")
-    print(f"[Analyst v2] DEBUG: candles_5m_raw len: {len(candles_5m_raw) if hasattr(candles_5m_raw, '__len__') else 'N/A'}")
-    if isinstance(candles_5m_raw, str):
-        print(f"[Analyst v2] DEBUG: candles_5m_raw preview: {candles_5m_raw[:100]}...")
-    elif isinstance(candles_5m_raw, list) and len(candles_5m_raw) > 0:
-         print(f"[Analyst v2] DEBUG: Last candle: {candles_5m_raw[-1]}")
     
     candles_1h_raw = data.get("candles_1h", "")
     candles_4h_raw = data.get("candles_4h", "")
