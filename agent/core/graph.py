@@ -11,16 +11,12 @@ from langgraph.graph import StateGraph, END
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
 from agent.config.config import get_config
-from agent.legacy.analyst import analyst_node
-from agent.legacy.risk import risk_node
 from agent.nodes.merge import merge_node
-from agent.nodes.analyst_v2 import analyst_node as analyst_node_v2
-from agent.nodes.risk_v2 import risk_node as risk_node_v2
+from agent.nodes.analyst_v2 import analyst_node
+from agent.nodes.risk_v2 import risk_node
 from agent.db import get_session, ExitPlanRepository
 
-# Toggle for v2 nodes (set USE_V2=0 to disable)
-USE_V2_ANALYST = os.getenv("USE_V2_ANALYST", "1") == "1"
-USE_V2_RISK = os.getenv("USE_V2_RISK", "1") == "1"
+# Legacy v1 toggles removed - v2 is now standard
 
 
 class AgentState(TypedDict, total=False):
@@ -79,9 +75,7 @@ async def create_agent_graph(mcp_client: MultiServerMCPClient) -> StateGraph:
     
     # Create wrapper functions that include tools
     async def analyst_wrapper(state: AgentState) -> AgentState:
-        if USE_V2_ANALYST:
-            print("[Graph] Using analyst_v2 (3-phase)")
-            return await analyst_node_v2(state, tools)
+        print("[Graph] Using analyst_v2 (3-phase)")
         return await analyst_node(state, tools)
     
     async def risk_wrapper(state: AgentState) -> AgentState:
@@ -125,12 +119,9 @@ async def run_sequential_cycle(mcp_client: MultiServerMCPClient, initial_state: 
     
     cfg = get_config()
     
-    # 1. Run Analyst (use v2 if enabled)
-    if USE_V2_ANALYST:
-        print("[Cycle] Using analyst_v2 (3-phase)")
-        analyst_result = await analyst_node_v2(initial_state, tools)
-    else:
-        analyst_result = await analyst_node(initial_state, tools)
+    # 1. Run Analyst (v2)
+    print("[Cycle] Using analyst_v2 (3-phase)")
+    analyst_result = await analyst_node(initial_state, tools)
     
     # 2. Update state with Analyst signal so Risk can see it
     intermediate_state = {
@@ -142,11 +133,8 @@ async def run_sequential_cycle(mcp_client: MultiServerMCPClient, initial_state: 
     }
     
     # 3. Run Risk (now seeing the signal)
-    if USE_V2_RISK:
-        print("[Cycle] Using risk_v2 (no tool calls)")
-        risk_result = await risk_node_v2(intermediate_state, tools)
-    else:
-        risk_result = await risk_node(intermediate_state, tools)
+    print("[Cycle] Using risk_v2 (no tool calls)")
+    risk_result = await risk_node(intermediate_state, tools)
     
     # Merge the results
     merged_state = {
