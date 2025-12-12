@@ -116,6 +116,23 @@ def main():
         
         if st.button("🔄 Refresh Now"):
             st.rerun()
+
+        st.divider()
+        st.subheader("💾 Data Export")
+
+        # Database Path (mounted in Docker at /data/dspy_memory.db)
+        db_path = "/data/dspy_memory.db"
+        if os.path.exists(db_path):
+             with open(db_path, "rb") as f:
+                 db_data = f.read()
+                 st.download_button(
+                     label="📥 Download Shadow DB",
+                     data=db_data,
+                     file_name="dspy_memory.db",
+                     mime="application/x-sqlite3"
+                 )
+        else:
+             st.warning(f"DB file not found at {db_path}")
     
     # Main content
     col1, col2, col3, col4 = st.columns(4)
