@@ -7,13 +7,13 @@ Runs at the start of each inference cycle to minimize DB calls.
 
 from datetime import datetime, timedelta
 from typing import Optional
-from .db import get_session
-from .db.repository import (
+from agent.db import get_session
+from agent.db.repository import (
     TradeRepository,
     InferenceLogRepository,
     MarketMemoryRepository
 )
-from .db.models import Trade
+from agent.db.models import Trade
 from sqlmodel import select
 
 
