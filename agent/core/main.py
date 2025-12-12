@@ -82,6 +82,7 @@ async def get_account_state(tools: list) -> dict:
             "positions": pos_str,
             "open_symbols": [p.split(" ")[1] for p in active_positions], # Extract coin names
             "open_position_details": {pos.get("coin"): "LONG" if float(pos.get("szi", 0)) > 0 else "SHORT" for p in raw_state.get("assetPositions", []) for pos in [p.get("position", {})] if float(pos.get("szi", 0)) != 0},
+            "raw_positions": {pos.get("coin"): pos for p in raw_state.get("assetPositions", []) for pos in [p.get("position", {})] if float(pos.get("szi", 0)) != 0},
             "risk_level": risk_level,
             "withdrawable": float(raw_state.get("withdrawable", 0))
         }

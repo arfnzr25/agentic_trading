@@ -47,6 +47,10 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     has_open_position = target_coin in open_positions
     position_direction = account_state.get("open_position_details", {}).get(target_coin, None)
     
+    # Extract raw position details (for entry price fallback)
+    raw_positions = account_state.get("raw_positions", {})
+    position = raw_positions.get(target_coin, {})
+    
     mode_str = f"MANAGING {position_direction}" if has_open_position else "SEEKING ENTRY"
     print(f"[Analyst v2] Starting analysis for {target_coin} | Mode: {mode_str}")
     
