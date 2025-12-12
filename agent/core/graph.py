@@ -128,6 +128,7 @@ async def run_sequential_cycle(mcp_client: MultiServerMCPClient, initial_state: 
         **initial_state,
         "analyst_signal": analyst_result.get("analyst_signal"),
         "analyst_response": analyst_result.get("analyst_response"),
+        "analyst_metadata": analyst_result.get("analyst_metadata", {}), # Pass metadata (timings, context)
         "memory_context": analyst_result.get("memory_context"),  # Pass learning to Risk
         "market_data_snapshot": analyst_result.get("market_data_snapshot"), # Pass data to Shadow Runner
     }
