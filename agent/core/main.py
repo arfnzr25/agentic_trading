@@ -43,7 +43,7 @@ async def get_account_state(tools: list) -> dict:
              try:
                  import json
                  raw_state = json.loads(raw_state[0]["text"])
-             except:
+             except Exception:
                  pass
         elif isinstance(raw_state, str):
             import json

@@ -137,14 +137,14 @@ def summarize_candles(candles_json: str, max_candles: int = 10) -> str:
                 try:
                     import json
                     c = json.loads(c["text"])
-                except:
+                except Exception:
                     continue
             # Handle stringified JSON
             elif isinstance(c, str):
                 try:
                     import json
                     c = json.loads(c)
-                except:
+                except Exception:
                     continue
             
             # Extract data
@@ -155,7 +155,7 @@ def summarize_candles(candles_json: str, max_candles: int = 10) -> str:
                     "l": float(c.get("l", 0)),
                     "c": float(c.get("c", 0))
                 })
-            except:
+            except Exception:
                 continue
         
         if not parsed:

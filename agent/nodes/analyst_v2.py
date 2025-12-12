@@ -112,11 +112,11 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
             if isinstance(c, dict):
                 if "text" in c: # MCP TextContent
                     try: return _json.loads(c["text"])
-                    except: return {}
+                    except Exception: return {}
                 return c
             elif isinstance(c, str):
                 try: return _json.loads(c)
-                except: return {}
+                except Exception: return {}
             return {}
 
         if isinstance(candles_5m_raw, str) and candles_5m_raw.startswith('['):

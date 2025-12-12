@@ -1,0 +1,335 @@
+Found 167 potential issues.
+[PRINT_STMT] telegram.py:41 - Use structured logging instead of print().
+  Line: print("[TELEGRAM] No bot token configured, skipping...")
+[PRINT_STMT] telegram.py:58 - Use structured logging instead of print().
+  Line: print(f"[TELEGRAM] Bot started!")
+[PRINT_STMT] telegram.py:120 - Use structured logging instead of print().
+  Line: print(f"[TELEGRAM] Failed to send: {e}")
+[PRINT_STMT] telegram.py:135 - Use structured logging instead of print().
+  Line: print(f"[TELEGRAM] Failed to send notification: {e}")
+[BROKEN_REL_IMPORT] __init__.py:3 - Check relative imports in submodules.
+  Line: from .telegram import TelegramApprovalBot, get_telegram_bot
+[BROKEN_REL_IMPORT] __init__.py:2 - Check relative imports in submodules.
+  Line: from .config import get_config
+[PRINT_STMT] graph.py:83 - Use structured logging instead of print().
+  Line: print("[Graph] Using analyst_v2 (3-phase)")
+[PRINT_STMT] graph.py:130 - Use structured logging instead of print().
+  Line: print("[Cycle] Using analyst_v2 (3-phase)")
+[PRINT_STMT] graph.py:146 - Use structured logging instead of print().
+  Line: print("[Cycle] Using risk_v2 (no tool calls)")
+[PRINT_STMT] graph.py:205 - Use structured logging instead of print().
+  Line: print(f"[WARN] Failed to archive inference: {e}")
+[BROKEN_REL_IMPORT] main.py:19 - Check relative imports in submodules.
+  Line: from .graph import run_sequential_cycle, get_initial_state
+[BROKEN_REL_IMPORT] main.py:23 - Check relative imports in submodules.
+  Line: from .shadow_runner import run_shadow_cycle
+[BARE_EXCEPT] main.py:46 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[PRINT_STMT] main.py:95 - Use structured logging instead of print().
+  Line: print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Starting inference cycle...")
+[PRINT_STMT] main.py:105 - Use structured logging instead of print().
+  Line: print(f"  Account: Equity ${account_state.get('equity', 'N/A')}, "
+[PRINT_STMT] main.py:115 - Use structured logging instead of print().
+  Line: print(f"  Decision: {action}")
+[PRINT_STMT] main.py:118 - Use structured logging instead of print().
+  Line: print(f"  Trade: {trade.get('coin')} {'LONG' if trade.get('is_buy') else 'SHORT'
+[PRINT_STMT] main.py:121 - Use structured logging instead of print().
+  Line: print(f"  Awaiting Telegram approval...")
+[PRINT_STMT] main.py:147 - Use structured logging instead of print().
+  Line: print(f"[Telegram] Notification error: {tg_err}")
+[PRINT_STMT] main.py:161 - Use structured logging instead of print().
+  Line: print("=" * 60)
+[PRINT_STMT] main.py:162 - Use structured logging instead of print().
+  Line: print("  Hyperliquid AI Trading Agent")
+[PRINT_STMT] main.py:163 - Use structured logging instead of print().
+  Line: print("=" * 60)
+[PRINT_STMT] main.py:164 - Use structured logging instead of print().
+  Line: print(f"  MCP Server: {cfg.mcp_server_url}")
+[PRINT_STMT] main.py:165 - Use structured logging instead of print().
+  Line: print(f"  Analyst Model: {cfg.analyst_model}")
+[PRINT_STMT] main.py:166 - Use structured logging instead of print().
+  Line: print(f"  Risk Model: {cfg.risk_model}")
+[PRINT_STMT] main.py:167 - Use structured logging instead of print().
+  Line: print(f"  Inference Interval: {cfg.inference_interval_seconds}s (3 min)")
+[PRINT_STMT] main.py:168 - Use structured logging instead of print().
+  Line: print(f"  Max Position: {cfg.risk.max_position_pct * 100}%")
+[PRINT_STMT] main.py:169 - Use structured logging instead of print().
+  Line: print(f"  Max Drawdown: {cfg.risk.max_drawdown_pct * 100}%")
+[PRINT_STMT] main.py:170 - Use structured logging instead of print().
+  Line: print(f"  Auto-Approve Limit: ${cfg.risk.auto_approve_usd}")
+[PRINT_STMT] main.py:171 - Use structured logging instead of print().
+  Line: print("=" * 60)
+[PRINT_STMT] main.py:174 - Use structured logging instead of print().
+  Line: print("\n[INIT] Creating database tables...")
+[PRINT_STMT] main.py:179 - Use structured logging instead of print().
+  Line: print(f"[INIT] Connecting to MCP server at {cfg.mcp_server_url}...")
+[PRINT_STMT] main.py:196 - Use structured logging instead of print().
+  Line: print(f"[INIT] Connected! {len(tools)} tools available.")
+[PRINT_STMT] main.py:198 - Use structured logging instead of print().
+  Line: print(f"[INIT] Connection failed: {e}. Retrying in 5s...")
+[PRINT_STMT] main.py:203 - Use structured logging instead of print().
+  Line: print(f"[INIT] Tools: {', '.join(tool_names)}...")
+[PRINT_STMT] main.py:205 - Use structured logging instead of print().
+  Line: print("\n[RUNNING] Starting inference loop (Ctrl+C to stop)...")
+[PRINT_STMT] main.py:212 - Use structured logging instead of print().
+  Line: print(f"\n--- Cycle #{cycle_count} ---")
+[PRINT_STMT] main.py:217 - Use structured logging instead of print().
+  Line: print(f"\n[WAIT] Sleeping {cfg.inference_interval_seconds}s until next cycle..."
+[PRINT_STMT] main.py:221 - Use structured logging instead of print().
+  Line: print("\n[STOP] Shutting down gracefully...")
+[PRINT_STMT] main.py:225 - Use structured logging instead of print().
+  Line: print(f"\n[ERROR] Cycle failed: {e}")
+[PRINT_STMT] main.py:245 - Use structured logging instead of print().
+  Line: print("\nGoodbye!")
+[PRINT_STMT] shadow_runner.py:28 - Use structured logging instead of print().
+  Line: print("[Shadow Mode] Database initialized")
+[PRINT_STMT] shadow_runner.py:30 - Use structured logging instead of print().
+  Line: print("[Shadow Mode] Cycle started (Async)")
+[BARE_EXCEPT] shadow_runner.py:60 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[PRINT_STMT] shadow_runner.py:76 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Simulation Error: {sim_error}")
+[PRINT_STMT] shadow_runner.py:81 - Use structured logging instead of print().
+  Line: print("[Shadow Mode] Market data empty, skipping inference.")
+[PRINT_STMT] shadow_runner.py:134 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] ACTION: Closing all {signal.coin} positions (Reason: {reas
+[PRINT_STMT] shadow_runner.py:145 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] RESULT: {signal.signal} ({signal.confidence:.0%}) - {signa
+[PRINT_STMT] shadow_runner.py:146 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Shadow Equity: ${shadow_equity:.2f} | Size: ${size_usd:.2f
+[PRINT_STMT] shadow_runner.py:147 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Reasoning: {reasoning[:100]}...")
+[PRINT_STMT] shadow_runner.py:172 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Saved trade to memory (ID: {trade_record.id})")
+[PRINT_STMT] shadow_runner.py:191 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] EXECUTION ERROR: {e}")
+[BROKEN_REL_IMPORT] async_logger.py:5 - Check relative imports in submodules.
+  Line: from .engine import get_session
+[BROKEN_REL_IMPORT] async_logger.py:6 - Check relative imports in submodules.
+  Line: from .repository import AgentLogRepository
+[PRINT_STMT] async_logger.py:38 - Use structured logging instead of print().
+  Line: print("[AsyncLogger] Background worker started.")
+[PRINT_STMT] async_logger.py:50 - Use structured logging instead of print().
+  Line: print("[AsyncLogger] Background worker stopped.")
+[PRINT_STMT] async_logger.py:71 - Use structured logging instead of print().
+  Line: print(f"[AsyncLogger] Failed to queue log: {e}")
+[PRINT_STMT] async_logger.py:89 - Use structured logging instead of print().
+  Line: print(f"[AsyncLogger] Worker error: {e}")
+[PRINT_STMT] async_logger.py:98 - Use structured logging instead of print().
+  Line: print(f"[AsyncLogger] DB Write Failed: {e}")
+[PRINT_STMT] async_logger.py:114 - Use structured logging instead of print().
+  Line: print(f"[AsyncLogger] Repository Error: {e}")
+[PRINT_STMT] dspy_memory.py:155 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Initialized account with ${initial_equity:.2f}")
+[PRINT_STMT] dspy_memory.py:194 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Account updated: ${account.current_equity:.2f} (Net: ${net
+[BROKEN_REL_IMPORT] engine.py:39 - Check relative imports in submodules.
+  Line: from .models import ALL_MODELS  # noqa: F401
+[BROKEN_REL_IMPORT] repository.py:12 - Check relative imports in submodules.
+  Line: from .models import Trade, Signal, ExitPlan, Approval, AgentLog, MarketMemory, I
+[BROKEN_REL_IMPORT] repository.py:13 - Check relative imports in submodules.
+  Line: from .engine import get_session
+[BROKEN_REL_IMPORT] __init__.py:2 - Check relative imports in submodules.
+  Line: from .engine import create_tables, get_session, get_async_session
+[BROKEN_REL_IMPORT] __init__.py:3 - Check relative imports in submodules.
+  Line: from .repository import (
+[BROKEN_REL_IMPORT] __init__.py:11 - Check relative imports in submodules.
+  Line: from .models import (
+[PRINT_STMT] create_dataset.py:12 - Use structured logging instead of print().
+  Line: print(f"Found {len(trades)} closed trades.")
+[PRINT_STMT] create_dataset.py:53 - Use structured logging instead of print().
+  Line: print(f"Error parsing trade {t.id}: {e}")
+[PRINT_STMT] create_dataset.py:56 - Use structured logging instead of print().
+  Line: print(f"Created {len(examples)} examples. Skipped {skipped}.")
+[PRINT_STMT] create_dataset.py:66 - Use structured logging instead of print().
+  Line: print("Dataset saved to DB.")
+[PRINT_STMT] inspect_db.py:10 - Use structured logging instead of print().
+  Line: print(f"ShadowTrade Count: {len(trades)}")
+[PRINT_STMT] inspect_db.py:11 - Use structured logging instead of print().
+  Line: print(f"OptimizationExample Count: {len(opt_examples)}")
+[PRINT_STMT] inspect_db.py:14 - Use structured logging instead of print().
+  Line: print("\nSample Trade:")
+[PRINT_STMT] inspect_db.py:16 - Use structured logging instead of print().
+  Line: print(f"  ID: {t.id}")
+[PRINT_STMT] inspect_db.py:17 - Use structured logging instead of print().
+  Line: print(f"  Coin: {t.coin}")
+[PRINT_STMT] inspect_db.py:18 - Use structured logging instead of print().
+  Line: print(f"  Signal: {t.signal}")
+[PRINT_STMT] inspect_db.py:19 - Use structured logging instead of print().
+  Line: print(f"  PnL: {t.pnl_usd}")
+[PRINT_STMT] inspect_db.py:20 - Use structured logging instead of print().
+  Line: print(f"  Trace exists: {bool(t.full_prompt_trace)}")
+[PRINT_STMT] inspect_db.py:25 - Use structured logging instead of print().
+  Line: print(f"  Trace Keys: {list(trace.keys())}")
+[PRINT_STMT] inspect_db.py:30 - Use structured logging instead of print().
+  Line: print(f"    {k}: {list(v.keys())}")
+[BARE_EXCEPT] inspect_db.py:31 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[PRINT_STMT] inspect_db.py:32 - Use structured logging instead of print().
+  Line: print("  Trace is not valid JSON")
+[PRINT_STMT] inspect_db.py:35 - Use structured logging instead of print().
+  Line: print("\nSample Optimization Example:")
+[PRINT_STMT] inspect_db.py:37 - Use structured logging instead of print().
+  Line: print(f"  Score: {o.score}")
+[PRINT_STMT] inspect_db.py:40 - Use structured logging instead of print().
+  Line: print(f"Error inspecting DB: {e}")
+[BROKEN_REL_IMPORT] modules.py:2 - Check relative imports in submodules.
+  Line: from .signatures import StrategicAnalysis
+[BARE_EXCEPT] modules.py:48 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[BARE_EXCEPT] modules.py:51 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[PRINT_STMT] modules.py:52 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Failed to parse: {val}")
+[PRINT_STMT] modules.py:58 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Schema Conversion Error: {e}")
+[BARE_EXCEPT] optimizer.py:44 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[PRINT_STMT] optimizer.py:47 - Use structured logging instead of print().
+  Line: print(f"Loaded {len(dataset)} examples from DB.")
+[PRINT_STMT] optimizer.py:75 - Use structured logging instead of print().
+  Line: print("Initializing Optimization...")
+[PRINT_STMT] optimizer.py:89 - Use structured logging instead of print().
+  Line: print(f"Not enough examples to run optimization (Found {len(trainset)}, Need {MI
+[PRINT_STMT] optimizer.py:90 - Use structured logging instead of print().
+  Line: print("Please let the Shadow Agent run longer to collect data.")
+[PRINT_STMT] optimizer.py:97 - Use structured logging instead of print().
+  Line: print(f"Starting MIPROv2 with {len(trainset)} examples...")
+[PRINT_STMT] optimizer.py:115 - Use structured logging instead of print().
+  Line: print(f"Optimization Complete! Saved to {save_path}")
+[PRINT_STMT] simulator.py:67 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Closed Trade {trade.id} ({reason}): Net ${net_pnl_usd:.2f}
+[PRINT_STMT] simulator.py:68 - Use structured logging instead of print().
+  Line: print(f"[Shadow Mode] Shadow Equity: ${stats.current_equity:.2f} ({stats.equity_
+[PRINT_STMT] analyst.py:112 - Use structured logging instead of print().
+  Line: print(f"[Analyst] Failed to fetch trade memory for {open_symbols}: {e}")
+[PRINT_STMT] analyst.py:200 - Use structured logging instead of print().
+  Line: print(f"[Analyst] Daily Memory HIT for {today_str} ({daily_memory.market_bias})"
+[PRINT_STMT] analyst.py:228 - Use structured logging instead of print().
+  Line: print(f"[Analyst] Daily Memory MISS for {today_str}. Fetching new data.")
+[PRINT_STMT] analyst.py:281 - Use structured logging instead of print().
+  Line: print(f"[Analyst] Iteration {i+1}/{max_iterations}")
+[PRINT_STMT] analyst.py:300 - Use structured logging instead of print().
+  Line: print(f"  Tool Call: {tool_name}")
+[PRINT_STMT] analyst.py:304 - Use structured logging instead of print().
+  Line: print(f"    Result: {str(result)[:100]}...")
+[PRINT_STMT] analyst.py:327 - Use structured logging instead of print().
+  Line: print(f"[Analyst] Reasoning: {response.content[:200]}...")
+[PRINT_STMT] analyst.py:332 - Use structured logging instead of print().
+  Line: print("[Analyst] Thinking... (Text-only response detected, nudging for tools)")
+[PRINT_STMT] risk.py:202 - Use structured logging instead of print().
+  Line: print(f"[Risk] Iteration {i+1}/{max_iterations}")
+[PRINT_STMT] risk.py:221 - Use structured logging instead of print().
+  Line: print(f"  Tool Call: {tool_name}")
+[PRINT_STMT] risk.py:225 - Use structured logging instead of print().
+  Line: print(f"    Result: {str(result)[:100]}...")
+[PRINT_STMT] risk.py:245 - Use structured logging instead of print().
+  Line: print(f"[Risk] Reasoning: {response.content[:200]}...")
+[BROKEN_REL_IMPORT] __init__.py:2 - Check relative imports in submodules.
+  Line: from .schemas import *
+[PRINT_STMT] analyst_v2.py:51 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Starting analysis for {target_coin} | Mode: {mode_str}")
+[PRINT_STMT] analyst_v2.py:77 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Trade thesis loaded: {active_trade.reasoning[:50]}...")
+[PRINT_STMT] analyst_v2.py:84 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Phase 1 (Memory): {phase1_time:.0f}ms")
+[PRINT_STMT] analyst_v2.py:95 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Phase 2 (Fetch + Learning): {phase2_time:.0f}ms")
+[BARE_EXCEPT] analyst_v2.py:115 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except: return {}
+[BARE_EXCEPT] analyst_v2.py:119 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except: return {}
+[PRINT_STMT] analyst_v2.py:133 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Price extraction error: {price_err}")
+[PRINT_STMT] analyst_v2.py:138 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Current {target_coin} price: ${current_close:,.2f}")
+[PRINT_STMT] analyst_v2.py:147 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Timeframes: 5m/1h/4h/1d loaded")
+[PRINT_STMT] analyst_v2.py:273 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Phase 3 (LLM): {phase3_time:.0f}ms")
+[PRINT_STMT] analyst_v2.py:289 - Use structured logging instead of print().
+  Line: print(f"\n{'='*60}")
+[PRINT_STMT] analyst_v2.py:290 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] SIGNAL: {signal.get('signal', 'UNKNOWN')} ({signal.get('con
+[PRINT_STMT] analyst_v2.py:291 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] REASONING: {signal.get('reasoning', 'No reasoning')[:200]}.
+[PRINT_STMT] analyst_v2.py:293 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Entry: ${signal.get('entry_price'):.2f} | SL: ${signal.get(
+[PRINT_STMT] analyst_v2.py:294 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] TOTAL TIME: {total_time:.0f}ms")
+[PRINT_STMT] analyst_v2.py:295 - Use structured logging instead of print().
+  Line: print(f"{'='*60}\n")
+[PRINT_STMT] analyst_v2.py:317 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] Error: {e}")
+[PRINT_STMT] analyst_v2.py:346 - Use structured logging instead of print().
+  Line: print("[Analyst v2] PARSE ERROR: No JSON found in response")
+[PRINT_STMT] analyst_v2.py:358 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] VALIDATION FAILED: {validation_err}")
+[PRINT_STMT] analyst_v2.py:368 - Use structured logging instead of print().
+  Line: print(f"[Analyst v2] JSON PARSE ERROR: {e}")
+[PRINT_STMT] merge.py:46 - Use structured logging instead of print().
+  Line: print(f"[Merge] Analyst signal: {analyst_signal.get('signal')} | Risk decision: 
+[PRINT_STMT] merge.py:69 - Use structured logging instead of print().
+  Line: print(f"[Merge] CLOSE signal detected - executing position close for {coin}")
+[PRINT_STMT] merge.py:84 - Use structured logging instead of print().
+  Line: print(f"[Merge] CUT_LOSS signal detected - emergency close for {coin}")
+[PRINT_STMT] merge.py:99 - Use structured logging instead of print().
+  Line: print(f"[Merge] SCALE_OUT signal detected - closing 50% of {coin} position")
+[PRINT_STMT] merge.py:114 - Use structured logging instead of print().
+  Line: print(f"[Merge] SCALE_IN signal detected - adding to {coin} position")
+[PRINT_STMT] merge.py:270 - Use structured logging instead of print().
+  Line: print(f"[Merge] LADDER MODE: Overriding size ${size_usd:.2f} -> ${max_position:.
+[PRINT_STMT] merge.py:274 - Use structured logging instead of print().
+  Line: print(f"[Merge] Warning: Size ${size_usd:.2f} below min ${MIN_ORDER_SIZE}, but n
+[PRINT_STMT] merge.py:469 - Use structured logging instead of print().
+  Line: print(f"[DB] Updated Trade {existing_trade.id} Exit Plan")
+[PRINT_STMT] merge.py:520 - Use structured logging instead of print().
+  Line: print(f"[DB] Created New Trade {trade.id}")
+[PRINT_STMT] merge.py:523 - Use structured logging instead of print().
+  Line: print(f"DB Error: {e}")
+[PRINT_STMT] risk_v2.py:37 - Use structured logging instead of print().
+  Line: print(f"\n[Risk v2] Evaluating signal: {signal_type} ({confidence:.0%})")
+[PRINT_STMT] risk_v2.py:44 - Use structured logging instead of print().
+  Line: print(f"[Risk v2] Decision: NO_TRADE (signal={signal_type}, conf={confidence:.0%
+[PRINT_STMT] risk_v2.py:147 - Use structured logging instead of print().
+  Line: print(f"\n{'='*60}")
+[PRINT_STMT] risk_v2.py:148 - Use structured logging instead of print().
+  Line: print(f"[Risk v2] DECISION: {decision.get('action', 'UNKNOWN')}")
+[PRINT_STMT] risk_v2.py:150 - Use structured logging instead of print().
+  Line: print(f"[Risk v2] SIZE: ${decision.get('size_usd', 0):.2f} @ {decision.get('leve
+[PRINT_STMT] risk_v2.py:151 - Use structured logging instead of print().
+  Line: print(f"[Risk v2] REASON: {decision.get('reason', 'No reason')[:150]}")
+[PRINT_STMT] risk_v2.py:152 - Use structured logging instead of print().
+  Line: print(f"{'='*60}\n")
+[PRINT_STMT] risk_v2.py:168 - Use structured logging instead of print().
+  Line: print(f"[Risk v2] Error: {e}")
+[PRINT_STMT] risk_v2.py:202 - Use structured logging instead of print().
+  Line: print("[Risk v2] PARSE ERROR: No JSON found")
+[PRINT_STMT] risk_v2.py:238 - Use structured logging instead of print().
+  Line: print(f"[Risk v2] VALIDATION FAILED: {validation_err} | RAW: {raw_data}")
+[PRINT_STMT] risk_v2.py:249 - Use structured logging instead of print().
+  Line: print(f"[Risk v2] ERROR: {e}")
+[PRINT_STMT] data_fetcher.py:79 - Use structured logging instead of print().
+  Line: print(f"[DataFetcher] Parallel fetch completed in {elapsed:.0f}ms")
+[BARE_EXCEPT] data_fetcher.py:140 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[BARE_EXCEPT] data_fetcher.py:147 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[BARE_EXCEPT] data_fetcher.py:158 - Avoid bare 'except' clauses. Catch specific exceptions.
+  Line: except:
+[PRINT_STMT] telegram.py:60 - Use structured logging instead of print().
+  Line: print(f"[Telegram] Failed to send: {resp.status}")
+[PRINT_STMT] telegram.py:63 - Use structured logging instead of print().
+  Line: print(f"[Telegram] Error sending message: {e}")
+[PRINT_STMT] codebase_scan.py:10 - Use structured logging instead of print().
+  Line: "PRINT_STMT": (r"print\(", "Use structured logging instead of print()."),
+[TODO_FIXME] codebase_scan.py:13 - Unresolved TODO/FIXME item.
+  Line: "TODO_FIXME": (r"(TODO|FIXME)", "Unresolved TODO/FIXME item."),
+[PRINT_STMT] codebase_scan.py:51 - Use structured logging instead of print().
+  Line: print(f"Scan complete. Found {len(issues)} issues.")
+[PRINT_STMT] learning.py:22 - Use structured logging instead of print().
+  Line: print("[Learning] get_user_fills tool not found")
+[PRINT_STMT] learning.py:31 - Use structured logging instead of print().
+  Line: print(f"[Learning] Error fetching fills: {e}")
+[PRINT_STMT] learning.py:162 - Use structured logging instead of print().
+  Line: print("[Learning] System initialized (learning from real trades)")
