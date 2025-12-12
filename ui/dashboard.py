@@ -120,19 +120,31 @@ def main():
         st.divider()
         st.subheader("💾 Data Export")
 
-        # Database Path (mounted in Docker at /data/dspy_memory.db)
-        db_path = "/data/dspy_memory.db"
-        if os.path.exists(db_path):
-             with open(db_path, "rb") as f:
-                 db_data = f.read()
+        col_d1, col_d2 = st.columns(2)
+
+        # 1. Shadow DB
+        shadow_db_path = "/data/dspy_memory.db"
+        if os.path.exists(shadow_db_path):
+             with open(shadow_db_path, "rb") as f:
                  st.download_button(
-                     label="📥 Download Shadow DB",
-                     data=db_data,
+                     label="📥 Shadow DB",
+                     data=f.read(),
                      file_name="dspy_memory.db",
-                     mime="application/x-sqlite3"
+                     mime="application/x-sqlite3",
+                     key="dl_shadow"
                  )
-        else:
-             st.warning(f"DB file not found at {db_path}")
+        
+        # 2. Main Agent DB
+        agent_db_path = "/data/agent.db"
+        if os.path.exists(agent_db_path):
+             with open(agent_db_path, "rb") as f:
+                 st.download_button(
+                     label="📥 Main DB",
+                     data=f.read(),
+                     file_name="agent.db",
+                     mime="application/x-sqlite3",
+                     key="dl_main"
+                 )
     
     # Main content
     col1, col2, col3, col4 = st.columns(4)
