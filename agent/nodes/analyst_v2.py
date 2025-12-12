@@ -327,7 +327,7 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     # Add derived fields
     data["coin"] = target_coin
     data["close"] = current_close
-    print(f"[Analyst v2] Current {target_coin} price: ${current_close:,.2f}")
+    print(f"\n[Analyst v2] 💰 Current {target_coin} price: ${current_close:,.2f}")
     print(f"[Analyst v2] Context generated: {ind_5m.get('regime', 'N/A')}")
     
     # Show brief summary

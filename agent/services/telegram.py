@@ -57,18 +57,26 @@ async def send_message(text: str, parse_mode: str = "Markdown") -> bool:
             async with session.post(url, json=payload, timeout=10) as resp:
                 if resp.status == 200:
                     return True
-                elif resp.status == 400 and parse_mode:
-                    # Retry as Plain Text if Markdown failed (Bad Request)
-                    print(f"[Telegram] Formatting error (400). Retrying as plain text...")
-                    payload["parse_mode"] = None
+                
+                # Capture error details for debugging
+                err_text = await resp.text()
+                
+                if resp.status == 400 and parse_mode:
+                    # Retry as Plain Text if Markdown failed
+                    print(f"[Telegram] Formatting error (400). Retrying as plain text... Error: {err_text}")
+                    
+                    # Remove parse_mode entirely instead of setting to None
+                    payload.pop("parse_mode", None)
+                    
                     async with session.post(url, json=payload, timeout=10) as retry_resp:
                         if retry_resp.status == 200:
                             return True
                         else:
-                            print(f"[Telegram] Retry failed: {retry_resp.status}")
+                            retry_err = await retry_resp.text()
+                            print(f"[Telegram] Retry failed: {retry_resp.status} | Response: {retry_err}")
                             return False
                 else:
-                    print(f"[Telegram] Failed to send: {resp.status}")
+                    print(f"[Telegram] Failed to send: {resp.status} | Response: {err_text}")
                     return False
     except Exception as e:
         print(f"[Telegram] Error sending message: {e}")
