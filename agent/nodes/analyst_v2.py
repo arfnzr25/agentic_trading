@@ -348,7 +348,43 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
                  }
              }
 
-        # 2. Thesis Validation: If confluence breaks, exit.
+        # 2. UNIVERSAL DEFENSIVE PROFIT TAKING (Reversal / Volatility Protection)
+        # If we are in profit (even small), but market turns against us, TAKE IT.
+        if unrealized_pnl > 0:
+            # Check 1m Momentum Flip (Fastest Warning)
+            trend_1m_ema = ind_1m.get("ema_cross", "NEUTRAL")
+            
+            # Determine opposing direction
+            opposing_dir = "BEARISH" if position_direction == "LONG" else "BULLISH"
+            
+            # Condition A: 1m Momentum hard flip against us
+            reversal_warning = (trend_1m_ema == opposing_dir)
+            
+            # Condition B: 5m Regime hard flip against us (Structural break)
+            structure_break = (trend_5m == opposing_dir)
+            
+            if reversal_warning or structure_break:
+                 reason = "1m Momentum Reversal" if reversal_warning else "5m Structure Break"
+                 print(f"[Analyst v2] 🛡️ Defensive Exit Triggered: {reason} while in profit (${unrealized_pnl:.2f}).")
+                 return {
+                     "analyst_signal": {
+                         "signal": "CLOSE",
+                         "confidence": 1.0,
+                         "reasoning": f"Defensive Profit Take: Market reversed ({reason}) while position was green. Securing ${unrealized_pnl:.2f}.",
+                         "coin": target_coin
+                     },
+                     "analyst_response": None,
+                     "analyst_metadata": {
+                         "mode": mode_str,
+                         "trade_mode": "DEFENSIVE_TP",
+                         "confluence": False,
+                         "current_close": current_close,
+                         "phase1_time_ms": phase1_time,
+                         "total_time_ms": phase1_time + phase2_time
+                     }
+                 }
+
+        # 3. Thesis Validation: If confluence breaks, exit.
         if not confluence:
              print("[Analyst v2] 🔴 NERVOUS WATCHMAN: Confluence broken on open position. Signaling CLOSE.")
              # Construct artificial signal to bypass LLM cost and enforce discipline
