@@ -173,14 +173,8 @@ async def run_inference_cycle(mcp_client: MultiServerMCPClient, tools: list, cyc
                 size_usd=float(size_usd),
                 leverage=int(leverage),
                 entry_price=float(entry_px),
-                stop_loss=trade.get("sl_pct"), # Pct not price? Helper handles conversion? No telegram expects price usually? 
-                # Wait, notify_trade_executed signature expects Price for SL/TP?
-                # merge.py trade_params has 'sl_pct'.
-                # We need to calc price or pass None for now to avoid confusion?
-                # Actually telegram.py format prints it with $ sign. So it expects PRICE.
-                # Logic: Entry * (1 +/- sl_pct)
-                stop_loss=None, 
-                take_profit=None,
+                stop_loss=None, # Placeholder (TODO: Convert pct to price)
+                take_profit=None, # Placeholder
                 order_type=tg_type
             )
             
