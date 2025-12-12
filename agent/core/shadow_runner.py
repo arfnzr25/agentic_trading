@@ -162,7 +162,10 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
             stop_loss=signal.stop_loss,
             take_profit=signal.take_profit,
             market_context_hash=str(hash(str(inputs))),
-            full_prompt_trace=json.dumps(prediction.plan.model_dump())
+            full_prompt_trace=json.dumps({
+                "inputs": inputs,
+                "output": prediction.plan.model_dump()
+            })
         )
         
         DSPyRepository.save_trade(trade_record)

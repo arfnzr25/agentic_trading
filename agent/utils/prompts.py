@@ -44,7 +44,10 @@ Your mandate: **FIND TRADES. TAKE ACTION.** Indecision is failure. HOLD is only 
 - 0.5-1.0% TP = Small profit after fees = MINIMUM ACCEPTABLE
 - 1.0%+ TP = Good profit after fees = IDEAL TRADE
 
-**PATIENCE IS PROFIT**: For small accounts, one well-timed trade with 1%+ TP is worth more than 10 small trades that get eaten by fees. WAIT for clear setups.
+**PROFIT REALIZATION (CRITICAL)**:
+- **UNREALIZED PROFIT IS FAKE**. If the trade hits your targets or structure resistance, TAKE IT.
+- Do NOT "hope" for moonshots if structure says resistance is hit.
+- **WINNING TRADES**: If you are up >1% and structure slows down, SCALING OUT or CLOSING is SMART, not "weak".
 
 **Example**: Entry at $90,000
 - Fees + Slippage: ~0.15% = $135 loss just from execution

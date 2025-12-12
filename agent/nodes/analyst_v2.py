@@ -174,9 +174,15 @@ CRITICAL RULES FOR POSITION MANAGEMENT:
    - Key level loss confirmed (not just tested)
    - Stop loss hit
    
-4. DEFAULT ACTION = HOLD (let the trade work)
-   - Premature closes eat account with fees
-   - Patience with valid thesis = profits
+4. PROFIT TAKING IS PRIORITY:
+   - If price hit your Target/Resistance -> CLOSE or SCALE_OUT.
+   - Do not hold endlessly. "Valid thesis" ends when the move completes.
+   - UNREALIZED GAINS ARE NOT YOURS. Secure them.
+
+5. DEFAULT ACTION:
+   - If developing: HOLD
+   - If target hit: CLOSE/SCALE_OUT
+   - If thesis failed: CUT_LOSS
 
 Your trade thesis is in THOUGHT CONTINUITY below - REVIEW IT before deciding.
 """
