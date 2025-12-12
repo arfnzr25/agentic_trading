@@ -71,96 +71,70 @@ def format_inference_update(
     analyst_signal: dict,
     risk_decision: dict,
     final_action: str,
-    open_position_count: int = 0
+    open_position_count: int = 0,
+    metadata: Optional[dict] = None
 ) -> str:
     """
-    Format inference update for Telegram.
+    Format inference update to resemble detailed system logs (as requested).
     """
-    signal = analyst_signal.get("signal", "N/A")
+    metadata = metadata or {}
+    
+    # Extract Metadata
+    mode = metadata.get("mode", "UNKNOWN_MODE")
+    phase1 = metadata.get("phase1_time_ms", 0)
+    phase2 = metadata.get("phase2_time_ms", 0)
+    phase3 = metadata.get("phase3_time_ms", 0)
+    total_time = metadata.get("total_time_ms", 0)
+    current_close = metadata.get("current_close", 0)
+    position_direction = metadata.get("position_direction")
+    entry_price = metadata.get("entry_price")
+    
+    # Analyst Info
+    signal = analyst_signal.get("signal", "HOLD")
     confidence = analyst_signal.get("confidence", 0)
     conf_pct = confidence * 100 if confidence <= 1 else confidence
-    coin = analyst_signal.get("coin", "BTC")
+    reasoning = analyst_signal.get("reasoning", "No reasoning provided")
     
-    # Signal emoji
-    signal_emoji = {
-        "LONG": "🟢", "SHORT": "🔴", "HOLD": "🟡",
-        "CLOSE": "⚫", "CUT_LOSS": "🔴", "SCALE_OUT": "🟠", "SCALE_IN": "🟢"
-    }.get(signal, "⚪")
+    # Truncate reasoning for display if super long (Telegram limit ~4096)
+    if len(reasoning) > 800:
+        reasoning = reasoning[:800] + "..."
     
-    # Risk decision
-    risk_action = risk_decision.get("decision") or risk_decision.get("action", "N/A")
-    action_emoji = {
-        "APPROVE": "✅", "REJECT": "❌", "NO_TRADE": "⏸️",
-        "CUT_LOSS": "🔴", "SCALE_OUT": "🟠"
-    }.get(risk_action, "⚪")
+    # Build the message components
     
-    # Final action emoji
-    final_emoji = "🎯" if final_action == "EXECUTED" else "⏸️"
-    
-    # Build message
-    message = f"""📊 *Cycle #{cycle}*
+    # 1. Header & Account
+    msg = f"""agent-1  | --- Cycle #{cycle} ---
+agent-1  | 
+agent-1  | [Starting inference cycle...]
+agent-1  |  Account: Equity ${equity:,.2f}, Margin {margin_pct:.2f}%
+agent-1  | [Cycle] Using analyst_v2 (3-phase)"""
 
-💰 *Account*
-Equity: `${equity:.2f}` | Margin: `{margin_pct:.1f}%`
-Open Positions: `{open_position_count}`
+    # 2. Position Info (if exists)
+    if position_direction:
+         entry_str = f"${entry_price:,.2f}" if entry_price else "Unknown"
+         msg += f"\n               [Analyst V2] Position : {position_direction} | Entry Price : {entry_str}"
+    
+    # 3. Mode & Phases
+    msg += f"""
+agent-1  | [Analyst v2] Starting analysis for BTC | Mode: {mode}
+agent-1  | [Analyst v2] Phase 1 (Memory): {phase1}ms
+                [AnalystV2] Context Injection : Successful
+agent-1  | [Analyst v2] Phase 2 (Fetch + Learning): {phase2}ms
+agent-1  | [Analyst v2] Current BTC price: ${current_close:,.2f}
+agent-1  | [Analyst v2] Timeframes: 5m/1h/4h/1d loaded
+agent-1  | [Analyst v2] Phase 3 (LLM): {phase3}ms
+agent-1  | 
+agent-1  | ============================================================
+agent-1  | [Analyst v2] SIGNAL: {signal} ({conf_pct:.0f}% confidence)
+agent-1  | [Analyst v2] REASONING: {reasoning}
+agent-1  | [Analyst v2] TOTAL TIME: {total_time}ms
+agent-1  | ==========================================================
+"""
 
-{signal_emoji} *Analyst Signal: {signal}* ({conf_pct:.0f}%)"""
+    # Wrap in code block for monospaced look (or strictly follow logs)
+    # User asked for "Fix the telegram notification to follow this format"
+    # To make it look like logs in Telegram, code block is best.
     
-    # Add entry/SL/TP if available
-    entry = analyst_signal.get("entry_price")
-    sl = analyst_signal.get("stop_loss")
-    tp = analyst_signal.get("take_profit")
-    
-    if entry or sl or tp:
-        message += "\n"
-        if entry:
-            message += f"\nEntry: `${entry:,.2f}`"
-        if sl:
-            message += f" | SL: `${sl:,.2f}`"
-        if tp:
-            message += f" | TP: `${tp:,.2f}`"
-    
-    # Risk decision section
-    message += f"""
-
-{action_emoji} *Risk: {risk_action}*"""
-    
-    # Add sizing info if available
-    size = risk_decision.get("size_usd")
-    leverage = risk_decision.get("leverage")
-    if size and leverage:
-        message += f"\nSize: `${size:.2f}` @ `{leverage}x`"
-    
-    # Invalidation conditions if present
-    invalidation = risk_decision.get("invalidation_conditions", [])
-    if invalidation:
-        message += "\n⚠️ *Invalidation:*"
-        for cond in invalidation[:3]:  # Max 3 conditions
-            message += f"\n  • {cond}"
-    
-    # Final action
-    message += f"""
-
-{final_emoji} *Final: {final_action}*"""
-    
-    # Full reasoning (NO truncation for Telegram, limit is 4096)
-    reasoning = analyst_signal.get("reasoning", "")
-    if reasoning:
-        message += f"""
-
-📝 *Reasoning:*
-_{reasoning}_"""
-    
-    # Risk reasoning (up to 200 chars)
-    risk_reason = risk_decision.get("reason") or risk_decision.get("reasoning", "")
-    if risk_reason:
-        risk_reason = risk_reason[:200] + "..." if len(risk_reason) > 200 else risk_reason
-        message += f"""
-
-🛡️ *Risk Notes:*
-_{risk_reason}_"""
-    
-    return message
+    return f"```\n{msg}\n```"
 
 
 def format_trade_executed(

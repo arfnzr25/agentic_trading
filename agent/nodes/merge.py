@@ -10,12 +10,12 @@ from datetime import datetime
 from typing import Any
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from ..llm_factory import get_llm
-from ..prompts import get_merge_prompt
-from ..db import get_session, AgentLogRepository, TradeRepository, ExitPlanRepository, Trade, ExitPlan
-from ..db.async_logger import async_logger
+from agent.config.llm_factory import get_llm
+from agent.utils.prompts import get_merge_prompt
+from agent.db import get_session, AgentLogRepository, TradeRepository, ExitPlanRepository, Trade, ExitPlan
+from agent.db.async_logger import async_logger
 from sqlmodel import select
-from ..config import get_config
+from agent.config.config import get_config
 
 
 async def merge_node(state: dict[str, Any], tools: list) -> dict[str, Any]:

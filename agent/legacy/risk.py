@@ -9,12 +9,12 @@ import json
 from typing import Any
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 
-from ..llm_factory import get_risk_llm
-from ..prompts import get_risk_prompt, build_system_context
-from ..db import get_session, AgentLogRepository, ExitPlanRepository, MarketMemoryRepository, TradeRepository
-from ..db.async_logger import async_logger
+from agent.config.llm_factory import get_risk_llm
+from agent.utils.prompts import get_risk_prompt, build_system_context
+from agent.db import get_session, AgentLogRepository, ExitPlanRepository, MarketMemoryRepository, TradeRepository
+from agent.db.async_logger import async_logger
 from datetime import datetime
-from ..config import get_config
+from agent.config.config import get_config
 
 
 async def execute_tool_call(tool_call: dict, tools: list) -> str:

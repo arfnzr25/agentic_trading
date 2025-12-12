@@ -21,4 +21,4 @@ ENV PYTHONPATH="${PYTHONPATH}:/app"
 ENV PYTHONUNBUFFERED=1
 
 # Default Command (Agent)
-CMD ["python", "-m", "agent.main"]
+CMD ["python", "-m", "agent.core.main"]

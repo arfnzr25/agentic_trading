@@ -1,7 +1,7 @@
 import asyncio
 import json
 from typing import Any
-from .db.dspy_memory import init_dspy_db, DSPyRepository, ShadowTrade
+from agent.db.dspy_memory import init_dspy_db, DSPyRepository, ShadowTrade
 
 # Flag to ensure DB is initialized only once
 _DB_INITIALIZED = False
@@ -40,10 +40,10 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
     
     # --- EXECUTION ---
     try:
-        from .dspy.modules import ShadowTrader
-        from .telegram import notify_shadow_trade_opened
+        from agent.dspy.modules import ShadowTrader
+        from agent.services.telegram import notify_shadow_trade_opened
         import dspy
-        from .config import get_config
+        from agent.config.config import get_config
         
         # Initialize Module
         trader = ShadowTrader()
@@ -67,7 +67,7 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
         # --- SIMULATION STEP ---
         # Check outcomes of previous trades based on current price
         try:
-            from .dspy.simulator import ShadowSimulator
+            from agent.dspy.simulator import ShadowSimulator
             current_price = market_data.get("close", 0)
             coin = market_data.get("coin", "BTC")
             if current_price > 0:
@@ -83,7 +83,7 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
              
         # Context Injection: Get Shadow State
         from sqlmodel import select
-        from .db.dspy_memory import get_dspy_session, ShadowTrade
+        from agent.db.dspy_memory import get_dspy_session, ShadowTrade
         
         # 1. Get Open Positions details
         with get_dspy_session() as session:
@@ -132,7 +132,7 @@ async def run_shadow_cycle(state: dict[str, Any], tools: list):
         
         if signal.signal in ["CLOSE", "CUT_LOSS"]:
              print(f"[Shadow Mode] ACTION: Closing all {signal.coin} positions (Reason: {reasoning})")
-             from .dspy.simulator import ShadowSimulator
+             from agent.dspy.simulator import ShadowSimulator
              current_price = market_data.get("close", 0)
              if current_price > 0:
                  await ShadowSimulator.close_all_positions(signal.coin, current_price, reason=signal.signal)

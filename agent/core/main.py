@@ -15,13 +15,13 @@ import sys
 from datetime import datetime
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-from .config import get_config
+from agent.config.config import get_config
 from .graph import run_sequential_cycle, get_initial_state
-from .db import create_tables, get_session, AgentLogRepository
-from .db.async_logger import async_logger
-from .learning import init_learning
-from .dspy_runner import run_shadow_cycle
-from . import telegram
+from agent.db import create_tables, get_session, AgentLogRepository
+from agent.db.async_logger import async_logger
+from agent.utils.learning import init_learning
+from .shadow_runner import run_shadow_cycle
+from agent.services import telegram
 
 
 
@@ -131,6 +131,8 @@ async def run_inference_cycle(mcp_client: MultiServerMCPClient, tools: list, cyc
     try:
         analyst_signal = result.get("analyst_signal", {})
         risk_decision = result.get("risk_decision", {})
+        metadata = result.get("analyst_metadata", {})
+        
         await telegram.notify_inference(
             cycle=state.get("cycle_number", 0),
             equity=account_state.get("equity", 0),
@@ -138,7 +140,8 @@ async def run_inference_cycle(mcp_client: MultiServerMCPClient, tools: list, cyc
             analyst_signal=analyst_signal,
             risk_decision=risk_decision,
             final_action=action,
-            open_position_count=len(account_state.get("open_symbols", []))
+            open_position_count=len(account_state.get("open_symbols", [])),
+            metadata=metadata
         )
     except Exception as tg_err:
         print(f"[Telegram] Notification error: {tg_err}")

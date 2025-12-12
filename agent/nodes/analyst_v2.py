@@ -12,19 +12,19 @@ import time
 from typing import Any
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from ..llm_factory import get_analyst_llm
-from ..prompts import get_analyst_prompt, build_system_context
-from ..db.async_logger import async_logger
-from ..db import get_session, MarketMemoryRepository
-from ..db.models import MarketMemory, Trade
-from ..db.repository import InferenceLogRepository
-from ..config import get_config
-from ..memory_loader import preload_memory, format_memory_context
-from ..data_fetcher import fetch_analyst_data, calculate_timestamps, summarize_candles
-from ..learning import get_learning_context
+from agent.config.llm_factory import get_analyst_llm
+from agent.utils.prompts import get_analyst_prompt, build_system_context
+from agent.db.async_logger import async_logger
+from agent.db import get_session, MarketMemoryRepository
+from agent.db.models import MarketMemory, Trade
+from agent.db.repository import InferenceLogRepository
+from agent.config.config import get_config
+from agent.utils.memory_loader import preload_memory, format_memory_context
+from agent.services.data_fetcher import fetch_analyst_data, calculate_timestamps, summarize_candles
+from agent.utils.learning import get_learning_context
 from datetime import datetime
 from sqlmodel import select
-from ..models.schemas import TradeSignal
+from agent.models.schemas import TradeSignal
 
 
 async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
@@ -138,9 +138,9 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     print(f"[Analyst v2] Current {target_coin} price: ${current_close:,.2f}")
     
     # Summarize candle data (show more candles for better analysis)
-    candles_5m_summary = summarize_candles(candles_5m_raw, max_candles=15)
-    candles_1h_summary = summarize_candles(candles_1h_raw, max_candles=24)
-    candles_4h_summary = summarize_candles(candles_4h_raw, max_candles=12)
+    candles_5m_summary = summarize_candles(candles_5m_raw, max_candles=288)
+    candles_1h_summary = summarize_candles(candles_1h_raw, max_candles=168)
+    candles_4h_summary = summarize_candles(candles_4h_raw, max_candles=42)
     candles_1d_summary = summarize_candles(candles_1d_raw, max_candles=7)
     
     # Show brief summary
@@ -295,6 +295,16 @@ OUTPUT JSON:
             "tools_called": ["get_market_context", "get_candles", "get_account_health"],
             "memory_context": memory,  # Pass to Risk node
             "market_data_snapshot": data, # EXPOSE TO SHADOW RUNNER
+            "analyst_metadata": {
+                 "mode": mode_str,
+                 "phase1_time_ms": int(phase1_time),
+                 "phase2_time_ms": int(phase2_time),
+                 "phase3_time_ms": int(phase3_time),
+                 "total_time_ms": int(total_time),
+                 "current_close": current_close,
+                 "position_direction": position_direction,
+                 "entry_price": active_trade.entry_price if has_open_position and active_trade else None
+            }
         }
         
     except Exception as e:

@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.agent
-    command: python -m agent.main
+    command: python -m agent.core.main
     env_file:
       - .env
     environment:

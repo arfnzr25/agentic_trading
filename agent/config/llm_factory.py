@@ -6,7 +6,7 @@ with role-based model selection and model-specific configurations.
 """
 
 from langchain_openai import ChatOpenAI
-from .config import get_config
+from agent.config.config import get_config
 
 
 def is_gemini_model(model: str) -> bool:

@@ -10,11 +10,13 @@ from typing import Any, TypedDict
 from langgraph.graph import StateGraph, END
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-from .config import get_config
-from .nodes import analyst_node, risk_node, merge_node
-from .nodes.analyst_v2 import analyst_node as analyst_node_v2
-from .nodes.risk_v2 import risk_node as risk_node_v2
-from .db import get_session, ExitPlanRepository
+from agent.config.config import get_config
+from agent.legacy.analyst import analyst_node
+from agent.legacy.risk import risk_node
+from agent.nodes.merge import merge_node
+from agent.nodes.analyst_v2 import analyst_node as analyst_node_v2
+from agent.nodes.risk_v2 import risk_node as risk_node_v2
+from agent.db import get_session, ExitPlanRepository
 
 # Toggle for v2 nodes (set USE_V2=0 to disable)
 USE_V2_ANALYST = os.getenv("USE_V2_ANALYST", "1") == "1"
@@ -32,6 +34,7 @@ class AgentState(TypedDict, total=False):
     analyst_signal: dict
     analyst_response: Any
     analyst_error: str
+    analyst_metadata: dict  # Holds timings, mode, etc.
     
     # Risk output
     risk_decision: dict
@@ -117,8 +120,8 @@ async def run_sequential_cycle(mcp_client: MultiServerMCPClient, initial_state: 
     This ensures Risk Manager sees the actual Analyst signal before deciding.
     """
     import json
-    from .db import get_session, InferenceLogRepository
-    from .config import get_config
+    from agent.db import get_session, InferenceLogRepository
+    from agent.config.config import get_config
     
     cfg = get_config()
     

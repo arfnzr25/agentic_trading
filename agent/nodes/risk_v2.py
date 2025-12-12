@@ -9,11 +9,11 @@ import json
 from typing import Any
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from ..llm_factory import get_risk_llm
-from ..prompts import get_risk_prompt
-from ..db.async_logger import async_logger
-from ..config import get_config
-from ..models.schemas import RiskDecision
+from agent.config.llm_factory import get_risk_llm
+from agent.utils.prompts import get_risk_prompt
+from agent.db.async_logger import async_logger
+from agent.config.config import get_config
+from agent.models.schemas import RiskDecision
 
 
 async def risk_node(state: dict[str, Any], tools: list) -> dict[str, Any]:

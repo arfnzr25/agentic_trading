@@ -13,9 +13,14 @@ from dotenv import load_dotenv
 # Load environment variables from multiple locations
 # 1. agent/.env (preferred)
 # 2. project root .env (fallback)
-agent_dir = Path(__file__).parent
+# 1. agent/.env (preferred)
+# 2. project root .env (fallback)
+config_dir = Path(__file__).parent
+agent_dir = config_dir.parent
+project_root = agent_dir.parent
+
 load_dotenv(agent_dir / ".env")  # agent/.env
-load_dotenv(agent_dir.parent / ".env")  # project root .env
+load_dotenv(project_root / ".env")  # project root .env
 
 
 class RiskParams(BaseModel):
