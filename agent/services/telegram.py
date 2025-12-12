@@ -53,9 +53,20 @@ async def send_message(text: str, parse_mode: str = "Markdown") -> bool:
     try:
         connector = aiohttp.TCPConnector(ssl=_get_ssl_context())
         async with aiohttp.ClientSession(connector=connector) as session:
+            # Attempt 1: Send with specified parse_mode (Markdown)
             async with session.post(url, json=payload, timeout=10) as resp:
                 if resp.status == 200:
                     return True
+                elif resp.status == 400 and parse_mode:
+                    # Retry as Plain Text if Markdown failed (Bad Request)
+                    print(f"[Telegram] Formatting error (400). Retrying as plain text...")
+                    payload["parse_mode"] = None
+                    async with session.post(url, json=payload, timeout=10) as retry_resp:
+                        if retry_resp.status == 200:
+                            return True
+                        else:
+                            print(f"[Telegram] Retry failed: {retry_resp.status}")
+                            return False
                 else:
                     print(f"[Telegram] Failed to send: {resp.status}")
                     return False
