@@ -51,7 +51,12 @@ async def get_account_state(tools: list) -> dict:
                          open_orders = json.loads(raw_orders[0]["text"])
                      except: pass
                  elif isinstance(raw_orders, list):
-                     open_orders = raw_orders
+                     # Validate elements are dicts
+                     if all(isinstance(x, dict) for x in raw_orders):
+                         open_orders = raw_orders
+                     else:
+                         print(f"[Main] Warning: open_orders contained non-dict items: {raw_orders}")
+                         open_orders = []
              except Exception as oe:
                  print(f"[Main] Failed to fetch open orders: {oe}")
         

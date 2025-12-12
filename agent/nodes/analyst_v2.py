@@ -53,7 +53,10 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     
     # Extract Open Orders for TP/SL fallback
     open_orders = account_state.get("open_orders", [])
-    coin_orders = [o for o in open_orders if o.get("coin") == target_coin]
+    if isinstance(open_orders, list):
+        coin_orders = [o for o in open_orders if isinstance(o, dict) and o.get("coin") == target_coin]
+    else:
+        coin_orders = []
     
     # Simple heuristics for TP/SL from Open Orders
     exchange_tp = None
