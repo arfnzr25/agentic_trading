@@ -274,6 +274,43 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     confluence = regime_confluence or ema_confluence
     
     confluence_source = "REGIME" if regime_confluence else ("EMA" if ema_confluence else "NONE")
+    
+    # --- PHASE 10: SCALPING MODE WITH COOLDOWN ---
+    if not confluence and not has_open_position:
+        # Check Cooldown
+        cooldown_hours = 4
+        is_cooldown = False
+        last_loss_time = 0
+        
+        # Check user fills for recent losses
+        # user_fills_raw is available from earlier scope
+        if isinstance(user_fills_raw, list):
+             # Sort desc by time just in case
+             sorted_fills = sorted(user_fills_raw, key=lambda x: x.get("time", 0), reverse=True)
+             for f in sorted_fills:
+                 pnl = float(f.get("closedPnl", 0))
+                 if pnl < 0:
+                     last_loss_time = f.get("time", 0)
+                     # Check if within window
+                     if (time.time() * 1000 - last_loss_time) < (cooldown_hours * 3600 * 1000):
+                         is_cooldown = True
+                     break # Found most recent loss
+                     
+        if is_cooldown:
+            print(f"[Analyst v2] 🧊 Scalping Cooldown Active (Last loss {((time.time()*1000-last_loss_time)/3600000):.1f}h ago). Ignoring micro-structure.")
+        else:
+            # Check Scalping Confluence
+            # Logic: 5m Regime aligns with 1m EMA Cross
+            trend_1m_ema = ind_1m.get("ema_cross", "NEUTRAL")
+            
+            # Require 5m Trend + 1m Momentum alignment
+            scalp_confluence = (trend_5m == trend_1m_ema) and (trend_5m != "NEUTRAL")
+            
+            if scalp_confluence:
+                confluence = True
+                confluence_source = "SCALPING (5m/1m)"
+                print(f"[Analyst v2] ⚡ Scalping Opportunity: 5m {trend_5m} + 1m {trend_1m_ema}")
+
     print(f"\n[Analyst v2] 💰 Current {target_coin} price: ${current_close:,.2f}")
 
     if has_open_position:
