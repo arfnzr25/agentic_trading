@@ -33,12 +33,15 @@ class RiskParams(BaseModel):
     auto_approve_usd: float = Field(default=100.0, description="Auto-approve trades below this USD value")
     prefer_max_leverage: bool = Field(default=True, description="Use maximum leverage for profit optimization")
     
-    # Sniper Mode Settings (Architecture v5)
-    sniper_leverage: int = Field(default=30, description="Leverage for high-conviction sniper trades")
-    default_leverage: int = Field(default=5, description="Leverage for standard conviction trades")
-    min_confidence: float = Field(default=0.6, description="Minimum confidence to trade")
-    sniper_confidence: float = Field(default=0.7, description="Confidence threshold for sniper mode")
-    require_confluence: bool = Field(default=True, description="Strictly require 1H/5M trend confluence")
+    # Sniper Mode Settings (Architecture v5) - Configurable via ENV
+    sniper_leverage: int = Field(default_factory=lambda: int(os.getenv("SNIPER_LEVERAGE", "30")))
+    default_leverage: int = Field(default_factory=lambda: int(os.getenv("DEFAULT_LEVERAGE", "5")))
+    min_confidence: float = Field(default_factory=lambda: float(os.getenv("MIN_CONFIDENCE", "0.6")))
+    sniper_confidence: float = Field(default_factory=lambda: float(os.getenv("SNIPER_CONFIDENCE", "0.7")))
+    
+    # Gatekeeper Toggle (Default: True)
+    # Set REQUIRE_CONFLUENCE=false in .env to disable
+    require_confluence: bool = Field(default_factory=lambda: os.getenv("REQUIRE_CONFLUENCE", "true").lower() == "true")
 
 
 class AgentConfig(BaseModel):
