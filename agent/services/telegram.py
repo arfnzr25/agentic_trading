@@ -118,6 +118,14 @@ def format_inference_update(
     
     # 2. Market Data
     msg += f"💰 *BTC Price:* `${current_close:,.2f}`\n"
+    
+    # Mode Display
+    mode = metadata.get("trade_mode", "UNKNOWN")
+    if mode == "SNIPER": mode_icon = "🎯"
+    elif mode == "SCALPING": mode_icon = "⚡"
+    else: mode_icon = "🤔"
+    
+    msg += f"{mode_icon} *Mode:* `{mode}`\n"
     msg += f"🧠 *Context Injection:* {'✅ Ready' if phase1 > 0 else '⚠️ Empty'}\n"
     
     # 3. Position Info (if exists)

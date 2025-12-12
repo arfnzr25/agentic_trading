@@ -273,6 +273,10 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
     # Combined: Either confluence qualifies (still disciplined, but responsive)
     confluence = regime_confluence or ema_confluence
     
+    # Mode Determination
+    trade_mode = "SNIPER" if confluence else "NONE"
+    active_mode = "SNIPER" # Default for nervous watchman unless we know otherwise
+
     confluence_source = "REGIME" if regime_confluence else ("EMA" if ema_confluence else "NONE")
     
     # --- PHASE 10: SCALPING MODE WITH COOLDOWN ---
@@ -309,13 +313,42 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
             if scalp_confluence:
                 confluence = True
                 confluence_source = "SCALPING (5m/1m)"
+                trade_mode = "SCALPING"
                 print(f"[Analyst v2] ⚡ Scalping Opportunity: 5m {trend_5m} + 1m {trend_1m_ema}")
 
     print(f"\n[Analyst v2] 💰 Current {target_coin} price: ${current_close:,.2f}")
+    if confluence:
+        print(f"[Analyst v2] ✅ Trade Mode: {trade_mode} ({confluence_source})")
 
     if has_open_position:
         # --- THE NERVOUS WATCHMAN (Active Management) ---
-        # 1. Thesis Validation: If confluence breaks, exit.
+        
+        # Strict Profit Taking for Scalping behavior (or just generally good practice for micro-accounts)
+        # We don't have persistent state to "know" if we entered as Scalp, but we can check PnL.
+        unrealized_pnl = float(state.get("account_state", {}).get("unrealizedPnl", 0))
+        
+        # 1. HARD RULE: If PnL > $1.00, Secure it (Scalping mindset)
+        if unrealized_pnl > 1.0:
+             print(f"[Analyst v2] 💰 Profit Target Hit (PnL > $1.0). Signaling TAKE PROFIT.")
+             return {
+                 "analyst_signal": {
+                     "signal": "CLOSE",
+                     "confidence": 1.0,
+                     "reasoning": f"Hard Profit Rule: PnL is ${unrealized_pnl:.2f} (> $1.00). Securing gains.",
+                     "coin": target_coin
+                 },
+                 "analyst_response": None,
+                 "analyst_metadata": {
+                     "mode": mode_str,
+                     "trade_mode": "MANUAL_TP",
+                     "confluence": True,
+                     "current_close": current_close,
+                     "phase1_time_ms": phase1_time,
+                     "total_time_ms": phase1_time + phase2_time
+                 }
+             }
+
+        # 2. Thesis Validation: If confluence breaks, exit.
         if not confluence:
              print("[Analyst v2] 🔴 NERVOUS WATCHMAN: Confluence broken on open position. Signaling CLOSE.")
              # Construct artificial signal to bypass LLM cost and enforce discipline
@@ -329,6 +362,7 @@ async def analyst_node(state: dict[str, Any], tools: list) -> dict[str, Any]:
                  "analyst_response": None,
                  "analyst_metadata": {
                      "mode": mode_str,
+                     "trade_mode": trade_mode,
                      "confluence": False,
                      "current_close": current_close,
                      "phase1_time_ms": phase1_time,
